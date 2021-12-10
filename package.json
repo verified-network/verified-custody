@@ -1,0 +1,30 @@
+{
+  "name": "verified-custody",
+  "version": "0.1.0",
+  "description": "Vault for Verified MPC transactions",
+  "main": "truffle-config.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/verified-network/verified-custody.git"
+  },
+  "keywords": [
+    "custody"
+  ],
+  "author": "Kallol Borah",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/verified-network/verified-custody/issues"
+  },
+  "homepage": "https://github.com/verified-network/verified-custody#readme",
+  "dependencies": {
+    "@truffle/hdwallet-provider": "^2.0.0",
+    "dotenv": "^10.0.0",
+    "eth-gas-reporter": "^0.2.23"
+  }
+}

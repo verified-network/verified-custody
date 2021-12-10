@@ -1,0 +1,4 @@
+*.sol linguist-detectable=true
+*.ts linguist-detectable=true
+*.ts linguist-language=Typescript
+*.sol linguist-language=Solidity
