@@ -9,27 +9,30 @@ pragma experimental ABIEncoderV2;
 interface IVault {
 
     struct transaction{
+        bytes32 transaction;
         uint256 datetime;
         uint256 amount;
-        uint256 cosigners;
+        address[] cosigners;
         address from;
         address to;
     }
 
     function createVault(address _vault) external;
 
-    function addParticipant(address _participant) external;
+    function addParticipant(address _vault, address _participant) external;
 
-    function changeParticipant(address _participant) external;
+    function removeParticipant(address _vault, address _participant) external;
 
-    function confirmParticipant(address _vault) external;
+    function confirmParticipant(address _vault, bytes32 _shard) external;
 
-    function defineQuorum(uint256 _minParticipants) external;
+    function defineQuorum(address _vault, uint256 _minParticipants) external;
 
-    function signTransaction(address _vault, bytes32 _transaction, address _from, address _to, uint256 _amount) external;
+    function signTransaction(address _vault, bytes32 _txHash, address _from, address _to, uint256 _amount) external;
 
-    function checkQuorum(bytes32 _transaction) external view returns(bool);
+    function checkQuorum(address _vault, bytes32 _txHash) external view returns(bool);
 
     function getTransactions(address _vault) external view returns(transaction[] memory);
+
+    function getShard(address _vault) external view returns(bytes32);
 
 }
