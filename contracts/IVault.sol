@@ -9,30 +9,28 @@ pragma experimental ABIEncoderV2;
 interface IVault {
 
     struct transaction{
-        bytes32 transaction;
         uint256 datetime;
-        uint256 amount;
         bytes32[] cosigners;
-        address from;
-        address to;
     }
 
-    function createVault(bytes32 _creator) external;
+    function createVault(bytes32 _creator, bytes32 _id) external;
 
-    function addParticipant(bytes32 _creator, bytes32 _participant) external;
+    function getCreator(bytes32 _creator) external returns(bytes32);
 
-    function removeParticipant(bytes32 _creator, bytes32 _participant) external;
+    function addParticipant(bytes32 _creator, bytes32 _id, bytes32 _participant) external;
 
-    function confirmParticipant(bytes32 _vault, bytes32 _participant, string calldata _shard, uint256 _pin) external;
+    function removeParticipant(bytes32 _creator, bytes32 _id, bytes32 _participant) external;
 
-    function defineQuorum(bytes32 _vault, uint256 _minParticipants) external;
+    function confirmParticipant(bytes32 _creator, bytes32 _participant, bytes32 _id, string calldata _shard, uint256 _pin) external;
 
-    function signTransaction(bytes32 _vault, bytes32 _participant, bytes32 _txHash, address _from, address _to, uint256 _amount) external;
+    function defineQuorum(bytes32 _creator, bytes32 _id, uint256 _minParticipants) external;
 
-    function checkQuorum(bytes32 _vault, bytes32 _participant, bytes32 _txHash) external view returns(bool);
+    function promptSignatures(bytes32 _creator, bytes32 _id) external;
 
-    function getTransactions(bytes32 _vault) external view returns(transaction[] memory);
+    function signTransaction(bytes32 _creator, bytes32 _participant, bytes32 _id, uint256 _tx, uint256 _pin) external;
 
-    function getShard(bytes32 _vault, bytes32 _participant) external view returns(string memory);
+    function checkQuorum(bytes32 _creator, bytes32 _id, bytes32 _participant, uint256 _txid) external view returns(bool);
+
+    function getShards(bytes32 _creator, bytes32 _id, uint256 _txid) external view returns(string[] memory);
 
 }
