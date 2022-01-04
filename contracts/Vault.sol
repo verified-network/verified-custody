@@ -132,7 +132,6 @@ contract Vault is IVault, Ownable {
     function promptSignatures(bytes32 _creator, bytes32 _id) external {
         require(creators[_creator]==_id);
         bytes32[] memory cs = new bytes32[](vaults[_creator].length);
-        cs[0] = _creator;
         uint256 txid = now;
         transaction memory currentTx = transaction({
             datetime : txid,
@@ -157,7 +156,12 @@ contract Vault is IVault, Ownable {
         require(creators[_participant]==_id);
         for(uint i=0; i<transactions[_creator].length; i++){
             if(transactions[_creator][i].datetime==_tx){
-                transactions[_creator][i].cosigners.push(_participant);
+                for(uint j=0; j<transactions[_creator][i].cosigners.length; j++){
+                    if(transactions[_creator][i].cosigners[j]==""){
+                        transactions[_creator][i].cosigners[j]=_participant;
+                        break;
+                    }
+                }
             }
         }
         emit SignTransaction(creators[_creator], _participant, _tx);
@@ -185,7 +189,7 @@ contract Vault is IVault, Ownable {
         else
             return false;
     }
-    
+    //event shard(string[] shardy);
     /**
         This function gets the shard for a participant
         @param _creator vault creator's username, eg creator@email.com
@@ -199,9 +203,10 @@ contract Vault is IVault, Ownable {
                 if(transactions[_creator][i].cosigners.length >= quorum[_creator]){
                     string[] memory keyShards = new string[](transactions[_creator][i].cosigners.length);
                     for(uint j=0; j<transactions[_creator][i].cosigners.length; j++){
-                        keyShards[j] = shards[_creator][transactions[_creator][i].cosigners[j]];
+                        keyShards[j] = shards[_creator][transactions[_creator][i].cosigners[j]];                        
                     }
                     delete transactions[_creator][i];
+                    //emit shard(keyShards);
                     return keyShards;
                 }
             }

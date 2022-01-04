@@ -60,10 +60,10 @@ contract("Vault contract testing", async (accounts) => {
                                                 if(res){
                                                     await vault.getShards(ethers.utils.formatBytes32String("creator@email.com"), ethers.utils.formatBytes32String("abc1234"), txid)
                                                     .then(async(shards)=>{
-                                                        console.log("Shards received are "+shards[0]+" "+shards[1]);
+                                                        console.log("Shards received are "+shards);
                                                         var comb = secrets.combine(shards);
                                                         console.log("Private key reconstructed from shards is "+comb);
-                                                        console.log("Is equal to the original key ? "+comb === randomWallet.privateKey);
+                                                        console.log("Is equal to the original key ? "+ (comb === randomWallet.privateKey));
                                                     })
                                                 }
                                             })
