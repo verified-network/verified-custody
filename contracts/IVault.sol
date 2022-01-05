@@ -31,6 +31,6 @@ interface IVault {
 
     function checkQuorum(bytes32 _creator, bytes32 _id, bytes32 _participant, uint256 _txid) external view returns(bool);
 
-    function getShards(bytes32 _creator, bytes32 _id, uint256 _txid) external returns(string[] memory);
+    function getShards(bytes32 _creator, bytes32 _id, uint256 _txid) external view returns(string[] memory);
 
 }

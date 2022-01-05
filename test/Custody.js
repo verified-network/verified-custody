@@ -7,6 +7,8 @@ const Vault = artifacts.require('Vault');
 
 contract("Vault contract testing", async (accounts) => {
 
+    const NULL_REFERENCE = '0x0000000000000000000000000000000000000000000000000000000000000000';
+
     var getFirstEvent = (_event) => {
         return new Promise((resolve, reject) => {
             _event.once('data', resolve).once('error', reject);
@@ -63,7 +65,7 @@ contract("Vault contract testing", async (accounts) => {
                                                         console.log("Shards received are "+shards);
                                                         var comb = secrets.combine(shards);
                                                         console.log("Private key reconstructed from shards is "+comb);
-                                                        console.log("Is equal to the original key ? "+ (comb === randomWallet.privateKey));
+                                                        console.log("Is equal to the original key ? "+ (comb === randomWallet.privateKey.substring(2)));
                                                     })
                                                 }
                                             })

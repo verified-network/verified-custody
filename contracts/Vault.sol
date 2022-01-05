@@ -189,14 +189,14 @@ contract Vault is IVault, Ownable {
         else
             return false;
     }
-    //event shard(string[] shardy);
+    
     /**
         This function gets the shard for a participant
         @param _creator vault creator's username, eg creator@email.com
         @param _id vault creator's unique id using which it can be reached, eg, its Google/APNS token
         @param _txid transaction identifier 
      */
-    function getShards(bytes32 _creator, bytes32 _id, uint256 _txid) external returns(string[] memory){
+    function getShards(bytes32 _creator, bytes32 _id, uint256 _txid) external view returns(string[] memory){
         require(creators[_creator]==_id);
         for(uint i=0; i<transactions[_creator].length; i++){
             if(transactions[_creator][i].datetime==_txid){
@@ -205,8 +205,7 @@ contract Vault is IVault, Ownable {
                     for(uint j=0; j<transactions[_creator][i].cosigners.length; j++){
                         keyShards[j] = shards[_creator][transactions[_creator][i].cosigners[j]];                        
                     }
-                    delete transactions[_creator][i];
-                    //emit shard(keyShards);
+                    //delete transactions[_creator][i];
                     return keyShards;
                 }
             }
