@@ -30,7 +30,7 @@ module.exports = {
             skipDryRun: true      
           },
         kovan: {
-            provider: () => new HDWalletProvider(mnemonic, "https://kovan.infura.io/v3/" + process.env.INFURA_API_KEY),
+            provider: () => new HDWalletProvider(mnemonic, "wss://eth-kovan.alchemyapi.io/v2/nWinponDmrq-aZ0m9CmUVEQfqi9Z9XgA"),
             network_id: 42,
             gas: 6721975,
             gasPrice: 10000000000,
@@ -39,8 +39,8 @@ module.exports = {
             skipDryRun: true  
         },
         rinkeby: {
-            provider: () => new HDWalletProvider(mnemonic, "wss://rinkeby.infura.io/ws/v3/9ad6464b853547b69d6a82e765c54925"), //test
-            //provider: () => new HDWalletProvider(mnemonic, "wss://rinkeby.infura.io/ws/v3/f77b6dfe988c484595d679cd2ca13f80"),
+            //provider: () => new HDWalletProvider(mnemonic, "wss://rinkeby.infura.io/ws/v3/9ad6464b853547b69d6a82e765c54925"), //test
+            provider: () => new HDWalletProvider(mnemonic, "wss://rinkeby.infura.io/ws/v3/9ad6464b853547b69d6a82e765c54925"),
             network_id: 4,
             websockets: true,
             gas: 6721975,
