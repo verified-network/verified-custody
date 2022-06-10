@@ -38,6 +38,16 @@ module.exports = {
             timeoutBlocks: 200,  
             skipDryRun: true  
         },
+        goerli: {
+            //provider: () => new HDWalletProvider(mnemonic, "wss://eth-kovan.alchemyapi.io/v2/yCwExvTCIvYy2IfvGTEvvkP0w7QHz4Yf"),
+            provider: () => new HDWalletProvider(mnemonic, "wss://goerli.infura.io/ws/v3/8151436a27dd4cdab264fa3ebf60a090"), //test
+            network_id: 5,
+            gas: 6721975,
+            gasPrice: 10000000000,
+            confirmations: 2,    
+            timeoutBlocks: 200,  
+            skipDryRun: true  
+        },
         rinkeby: {
             //provider: () => new HDWalletProvider(mnemonic, "wss://rinkeby.infura.io/ws/v3/9ad6464b853547b69d6a82e765c54925"), //test
             provider: () => new HDWalletProvider(mnemonic, "wss://rinkeby.infura.io/ws/v3/9ad6464b853547b69d6a82e765c54925"),
@@ -56,7 +66,19 @@ module.exports = {
             network_id: 1,
             gas: 6721975,
             gasPrice: 10000000000
-        }
+        },
+        //L2 network
+        verified: {
+            provider: () => new HDWalletProvider(mnemonic, "https://nd-066-100-634.p2pify.com/70453ade9cf4f4c3697d8342c0a75732"),
+            network_id: 10001,
+            gasPrice: 0,
+            gas: 4500000,
+            networkCheckTimeout: 10000000,
+            confirmations: 2,    
+            timeoutBlocks: 200,  
+            skipDryRun: true,  
+            type: "quorum"
+        },
     },
     compilers: {
         solc: {
