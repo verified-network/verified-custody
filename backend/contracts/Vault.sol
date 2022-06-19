@@ -53,8 +53,7 @@ contract Vault is IVault, Ownable {
         @param _creator the vault creator (eg, creator@email.com)
         @return the vault creator's unique ID
      */
-    function getCreator(bytes32 _creator) external returns(bytes32){
-        require(msg.sender == owner());
+    function getCreator(bytes32 _creator) onlyOwner external returns(bytes32){
         return creators[_creator];        
     }
 
