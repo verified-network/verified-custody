@@ -12,10 +12,10 @@ The Verified Custody contract enables the following workflow.
 
 ### Defining quorum
 3. The signer defines quorum which needs to be a minimum of 2 if the number of key shards (or co-signers) is 3.
-4. The signer adds co-signers to the vault. The number of co-signers should be equal to the number of key shards. This generates the NewParticipant event which is used to notify the co-signers by getting their messaging tokens mapped to their their user ids.
+4. The signer adds co-signers and their shards to the vault. The number of co-signers should be equal to the number of key shards. This generates the NewParticipant event which is used to notify the co-signers by getting their messaging tokens mapped to their their user ids.
 
 ### Shard assignment
-5. The signer and each co-signer confirms their participation in the vault by putting in their key shard and PIN number.  
+5. The signer and each co-signer confirms their participation in the vault by putting in their PIN number.  
 
 ### Transaction signing
 6. The signer prompts a signature for a transaction which generates a NewTransaction event.

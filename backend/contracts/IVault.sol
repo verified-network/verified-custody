@@ -13,24 +13,24 @@ interface IVault {
         bytes32[] cosigners;
     }
 
-    function createVault(bytes32 _creator, bytes32 _id) external;
+    function createVault(bytes32 _creator, string calldata _id) external;
 
-    function getCreator(bytes32 _creator) external returns(bytes32);
+    function getCreator(bytes32 _creator) external view returns(string memory);
 
-    function addParticipant(bytes32 _creator, bytes32 _id, bytes32 _participant) external;
+    function addParticipant(bytes32 _creator, bytes32 _participant, string calldata _shard) external;
 
-    function removeParticipant(bytes32 _creator, bytes32 _id, bytes32 _participant) external;
+    function removeParticipant(bytes32 _creator, bytes32 _participant) external;
 
-    function confirmParticipant(bytes32 _creator, bytes32 _participant, bytes32 _id, string calldata _shard, uint256 _pin) external;
+    function confirmParticipant(bytes32 _creator, bytes32 _participant, uint256 _pin) external;
 
-    function defineQuorum(bytes32 _creator, bytes32 _id, uint256 _minParticipants) external;
+    function defineQuorum(bytes32 _creator, uint256 _minParticipants) external;
 
-    function promptSignatures(bytes32 _creator, bytes32 _id) external;
+    function promptSignatures(bytes32 _creator) external;
 
-    function signTransaction(bytes32 _creator, bytes32 _participant, bytes32 _id, uint256 _tx, uint256 _pin) external;
+    function signTransaction(bytes32 _creator, bytes32 _participant, uint256 _tx, uint256 _pin) external;
 
-    function checkQuorum(bytes32 _creator, bytes32 _id, bytes32 _participant, uint256 _txid) external view returns(bool);
+    function checkQuorum(bytes32 _creator, bytes32 _participant, uint256 _txid) external view returns(bool);
 
-    function getShards(bytes32 _creator, bytes32 _id, uint256 _txid) external view returns(string[] memory);
+    function getShards(bytes32 _creator, uint256 _txid) external view returns(string[] memory);
 
 }
