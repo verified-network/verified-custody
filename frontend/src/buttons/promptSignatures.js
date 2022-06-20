@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Button, Spinner } from 'react-bootstrap';
+import { NotificationManager } from 'react-notifications';
 
 function PromptSignatures(props) {
     const [loading, setLoading] = useState(false);
@@ -8,7 +9,11 @@ function PromptSignatures(props) {
     setLoading(true);
     props.promptSignatures();
     props.custodyContract.promptSignatures().then(res => {
-        props.setPromptSignaturesDone(true);
+        if(res.status) {
+          NotificationManager.error(res.message);
+        } else {
+          props.setPromptSignaturesDone(true);
+        }
       console.log("App.js custodyContract.promptSignatures", res);
     }).catch(error => {
       console.log("App.js custodyContract.promptSignatures error", error);

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button, Spinner } from 'react-bootstrap';
 import { NotificationManager } from 'react-notifications';
 
-function CreateVault(props) {
+function CreateVaultParticipant(props) {
     const [loading, setLoading] = useState(false);
 
   const createVault = async () => {
@@ -29,4 +29,4 @@ function CreateVault(props) {
   );
 }
 
-export default CreateVault;
+export default CreateVaultParticipant;

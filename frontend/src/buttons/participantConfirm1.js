@@ -1,14 +1,19 @@
 import React, { useState } from 'react';
 import { Button, Spinner } from 'react-bootstrap';
+import { NotificationManager } from 'react-notifications';
 
 function ParticipantConfirm1(props) {
     const [loading, setLoading] = useState(false);
 
   const confirmParticipant = async () => {
     setLoading(true);
-    props.custodyContract.confirmParticipant('', '', props.shares[0], '').then(res => {
+    props.custodyContract.confirmParticipant().then(res => {
         console.log("App.js custodyContract.confirmParticipant", res);
-        props.setParticipant1Confirmed(true);
+        if(res.status) {
+          NotificationManager.error(res.message);
+        } else {
+          props.setParticipant1Confirmed(true);
+        }
       }).catch(error => {
         console.log("App.js custodyContract.confirmParticipant error", error);
       }).finally(() => {

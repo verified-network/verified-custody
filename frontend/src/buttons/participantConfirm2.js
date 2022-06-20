@@ -1,15 +1,20 @@
 import React, { useState } from 'react';
 import { Button, Spinner } from 'react-bootstrap';
-import { participantEmail, participantId, participantPin } from '../App';
+import { NotificationManager } from 'react-notifications';
+import { configs } from '../contracts/CustodyContractServiceCreator';
 
 function ParticipantConfirm2(props) {
     const [loading, setLoading] = useState(false);
 
   const confirmParticipant = async () => {
     setLoading(true);
-    props.custodyContract.confirmParticipant(participantEmail, participantId, props.shares[1], participantPin).then(res => {
+    props.custodyContract.confirmParticipant().then(res => {
         console.log("App.js custodyContract.confirmParticipant", res);
-        props.setParticipant2Confirmed(true);
+        if(res.status) {
+          NotificationManager.error(res.message);
+        } else {
+          props.setParticipant2Confirmed(true);
+        }
       }).catch(error => {
         console.log("App.js custodyContract.confirmParticipant error", error);
       }).finally(() => {

@@ -1,37 +1,49 @@
 import "./App.css";
 import { useEffect, useState } from "react";
-import CustodyContractService from "./contracts/CustodyContractService";
+import 'react-notifications/lib/notifications.css';
+import {NotificationContainer} from 'react-notifications';
+import CustodyContractServiceCreator, { configs } from "./contracts/CustodyContractServiceCreator";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { Container, Button } from "react-bootstrap";
+import { Container } from "react-bootstrap";
 import CreateVault from "./buttons/createVault";
 import DefineQuorum from "./buttons/defineQuorum";
-import AddParticipant from "./buttons/addParticipant";
+import AddParticipantCreator from "./buttons/addParticipantCreator";
 import ParticipantConfirm1 from "./buttons/participantConfirm1";
 import ParticipantConfirm2 from "./buttons/participantConfirm2";
 import PromptSignatures from "./buttons/promptSignatures";
-
-export const participantEmail = "participant@email.com";
-export const participantPin = "5678";
-export const participantId = "xyz1234";
+import CustodyContractServiceParticipant from "./contracts/CustodyContractServiceParticipant";
+import CreateVaultParticipant from "./buttons/createVaultParticipant";
+import SignTransactionCreator from "./buttons/signTransactionCreator";
+import SignTransactionsignParticipant from "./buttons/signTransactionParticipant";
+import AddParticipant from "./buttons/addParticipant";
+import CheckQuorum from "./buttons/checkQuorum";
+import GetShards from "./buttons/getShards";
 
 function App() {
   const [custodyContract, setCustodyContract] = useState();
+  const [custodyContractParticipant, setCustodyContractParticipant] = useState();
   const [wallet, setWallet] = useState();
   const [shares, setShares] = useState([]);
-  const [participant, setParticipant] = useState(participantEmail);
   const [txid, setTxid] = useState("");
   const [vaultCreated, setVaultCreated] = useState(false);
+  const [vaultCreatedParticipant, setVaultCreatedParticipant] = useState(false);
   const [quorumDefined, setQuorumDefined] = useState(false);
   const [participantAdded, setParticipantAdded] = useState(false);
+  const [participantCreatorAdded, setParticipantCreatorAdded] = useState(false);
   const [participant1Confirmed, setParticipant1Confirmed] = useState(false);
   const [participant2Confirmed, setParticipant2Confirmed] = useState(false);
   const [promptSignaturesDone, setPromptSignaturesDone] = useState(false);
+  const [signTransactionCreatorDone, setSignTransactionCreatorDone] = useState(false);
+  const [signTransactionParticipantDone, setSignTransactionParticipantDone] = useState(false);
+  const [checkQuorumDone, setCheckQuorumDone] = useState(false);
 
   useEffect(() => {
-    const contract = new CustodyContractService();
+    const contract = new CustodyContractServiceCreator();
     const wallet = contract.getWallet();
     setWallet(wallet);
     setCustodyContract(contract);
+    const contractParticipant = new CustodyContractServiceParticipant();
+    setCustodyContractParticipant(contractParticipant);
   }, []);
 
   useEffect(() => {
@@ -53,48 +65,18 @@ function App() {
     const vault = custodyContract.getVault();
     console.log("App.js promptSignatures", vault);
 
-    vault.NewTransaction((res) => {
+    vault.notifyNewTransaction((res) => {
       console.log("App.js custodyContract.NewTransaction", res);
-      setTxid(res.response.result[0]);
+      setTxid(res.returnValues.txid);
     });
-  };
-
-  const signTransaction = (participant, pin) => {
-    custodyContract
-      .signTransaction(participant, txid, pin)
-      .then((res) => {
-        console.log("App.js custodyContract.signTransaction", res);
-      })
-      .catch((error) => {
-        console.log("App.js custodyContract.signTransaction error", error);
-      });
-  };
-
-  const checkQuorum = () => {
-    custodyContract
-      .checkQuorum(participantEmail, txid)
-      .then((res) => {
-        console.log("App.js custodyContract.checkQuorum", res);
-      })
-      .catch((error) => {
-        console.log("App.js custodyContract.checkQuorum error", error);
-      });
-  };
-
-  const getShards = () => {
-    custodyContract
-      .getShards(txid)
-      .then((res) => {
-        console.log("App.js custodyContract.getShards", res);
-      })
-      .catch((error) => {
-        console.log("App.js custodyContract.getShards error", error);
-      });
   };
 
   return (
     <Container className="p-4 col-12">
       <div>
+      <div>
+        <b>Private Key: </b> {wallet?.privateKey}
+      </div>
         {shares.map((share, index) => {
           return (
             <div key={share}>
@@ -107,10 +89,10 @@ function App() {
       <div className=" col-12 mt-4">
         <div className="d-flex justify-around">
           <div style={{ flex: "1" }} className="d-flex justify-content-center">
-            <h4>Creator</h4>
+            <h4>Creator ({configs.creatorEmail})</h4>
           </div>
           <div style={{ flex: "1" }} className="d-flex justify-content-center">
-            <h4>Participant</h4>
+            <h4>Participant ({configs.participantEmail})</h4>
           </div>
         </div>
         <hr />
@@ -127,13 +109,19 @@ function App() {
               setQuorumDefined={setQuorumDefined}
               disabled={!vaultCreated}
             />
+            <AddParticipantCreator
+              custodyContract={custodyContract}
+              participantAdded={participantCreatorAdded}
+              setParticipantAdded={setParticipantCreatorAdded}
+              disabled={!quorumDefined}
+              shares={shares}
+            />
             <AddParticipant
               custodyContract={custodyContract}
               participantAdded={participantAdded}
               setParticipantAdded={setParticipantAdded}
-              participant={participant}
-              setParticipant={setParticipant}
               disabled={!quorumDefined}
+              shares={shares}
             />
             <ParticipantConfirm1
               custodyContract={custodyContract}
@@ -142,7 +130,6 @@ function App() {
               shares={shares}
               disabled={!participantAdded}
             />
-
             <PromptSignatures
               custodyContract={custodyContract}
               promptSignaturesDone={promptSignaturesDone}
@@ -151,46 +138,51 @@ function App() {
               disabled={!participant2Confirmed}
               promptSignatures={promptSignatures}
             />
+            <SignTransactionCreator
+              custodyContract={custodyContract}
+              txid={txid}
+              signTransactionCreatorDone={signTransactionCreatorDone}
+              setSignTransactionCreatorDone={setSignTransactionCreatorDone}
+            />
+            <CheckQuorum
+              custodyContract={custodyContract}
+              txid={txid}
+              checkQuorumDone={checkQuorumDone}
+              setCheckQuorumDone={setCheckQuorumDone}
+            />
+            <GetShards
+              custodyContract={custodyContract}
+              txid={txid}
+              checkQuorumDone={checkQuorumDone}
+              setCheckQuorumDone={setCheckQuorumDone}
+            />
           </div>
           <div style={{ flex: "1" }} className="">
             <div className="my-2">
               <div>txid: {txid}</div>
             </div>
+            <CreateVaultParticipant
+              custodyContract={custodyContractParticipant}
+              vaultCreated={vaultCreatedParticipant}
+              setVaultCreated={setVaultCreatedParticipant}
+            />
             <ParticipantConfirm2
-              custodyContract={custodyContract}
+              custodyContract={custodyContractParticipant}
               participant2Confirmed={participant2Confirmed}
               setParticipant2Confirmed={setParticipant2Confirmed}
               shares={shares}
               disabled={!participant1Confirmed}
             />
-            <div className="my-2">
-              <Button
-                disabled={!txid}
-                onClick={() =>
-                  signTransaction(participantEmail, participantPin)
-                }
-              >
-                Sign Transaction Participant 2
-              </Button>
-            </div>
+            <SignTransactionsignParticipant
+              custodyContract={custodyContractParticipant}
+              txid={txid}
+              signTransactionParticipantDone={signTransactionParticipantDone}
+              setSignTransactionParticipantDone={setSignTransactionParticipantDone}
+            />
           </div>
         </div>
       </div>
-
-      <div className="my-2">
-        <Button disabled={!txid} onClick={() => signTransaction("", "")}>
-          Sign Transaction Participant 1
-        </Button>
-      </div>
-
-      <div className="my-2">
-        <Button disabled={!txid} onClick={checkQuorum}>
-          Check Quorum
-        </Button>
-      </div>
-      <div className="my-2">
-        <Button onClick={getShards}>Get Shards</Button>
-      </div>
+      <NotificationContainer/>
     </Container>
   );
 }
