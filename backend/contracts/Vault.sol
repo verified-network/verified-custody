@@ -10,11 +10,17 @@ import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol
 
 contract Vault is IVault, Ownable {
 
+    //mapping of signer address to creator bytes32 id
+    mapping(address => bytes32) private signers;
+
     //mapping signer (its bytes32 ID, eg creator@vault.com) to its token (eg, Google/Apple push notification token)
-    mapping(bytes32 => bytes32) private creators;
+    mapping(bytes32 => string) private creators;
 
     //creating vault by mapping its creator (bytes32 ID, eg, creator@vault.com) to participants (bytes32 IDs, eg, participant@email.com) in the vault
     mapping(bytes32 => bytes32[]) private vaults;
+
+    //positional index of cosigners for vault. Mapping of vault creator to participant to its position
+    mapping(bytes32 => mapping(bytes32 => uint256)) private cosigners;
 
     //mapping vault (bytes32 ID, eg creator@vault.com) to participants (bytes32 ID, eg, participant@email.com) to their pin (uint256)
     mapping(bytes32 => mapping(bytes32 => uint256)) private pins;
@@ -29,22 +35,35 @@ contract Vault is IVault, Ownable {
     mapping(bytes32 => transaction[]) private transactions;
 
     //event that helps notify a participant to confirm PIN and shard
-    event NewParticipant(bytes32 creator, bytes32 participant);
+    event NewParticipant(bytes32 creator, string participant);
 
     //event that helps notify a participant to co-sign a transaction
-    event NewTransaction(bytes32 creator, bytes32 participant, uint256 txid);
+    event NewTransaction(bytes32 creator, string participant, uint256 txid);
 
     //event that helps notify a creator that a transaction has been signed
-    event SignTransaction(bytes32 creator, bytes32 participant, uint256 txid);
+    event SignTransaction(string creator, bytes32 participant, uint256 txid);
+
+    // modifiers
+    modifier onlySigner(bytes32 _creator, address _sender) {
+        require(signers[_sender]==_creator, 'Not a valid signer');
+        _;
+    }
+
+    constructor() public{
+        Ownable.initialize(msg.sender);
+    }
 
     /**
         This function creates a vault for the creator
         @param _creator vault creator's username, eg, creator@email.com
         @param _id vault creator's unique id using which it can be reached, eg, its Google/APNS token
      */
-    function createVault(bytes32 _creator, bytes32 _id) external {
+    function createVault(bytes32 _creator, string calldata _id) external {
         require(vaults[_creator].length==0);
-        creators[_creator]=_id;
+        require(signers[msg.sender]=="", 'Vault for creator already exists');
+        signers[msg.sender] = _creator;
+        creators[_creator] = _id;
+        cosigners[_creator][_creator] = vaults[_creator].length;
         vaults[_creator].push(_creator);
     }
 
@@ -53,42 +72,36 @@ contract Vault is IVault, Ownable {
         @param _creator the vault creator (eg, creator@email.com)
         @return the vault creator's unique ID
      */
-    function getCreator(bytes32 _creator) external returns(bytes32){
-        require(msg.sender == owner());
+    function getCreator(bytes32 _creator) onlyOwner external view returns(string memory){        
         return creators[_creator];        
     }
 
     /**
         This function adds a participant to a vault that belongs to its creator
         @param _creator vault creator's username, eg creator@email.com
-        @param _id vault creator's unique id using which it can be reached, eg, its Google/APNS token
         @param _participant vault participant's username, eg participant@email.com
+        @param _shard the private key shard of the participant
      */
-    function addParticipant(bytes32 _creator, bytes32 _id, bytes32 _participant) external {
-        require(vaults[_creator].length>0);
+    function addParticipant(bytes32 _creator, bytes32 _participant, string calldata _shard) onlySigner(_creator, msg.sender) external {
         require(vaults[_participant].length>0);
-        require(creators[_creator]==_id);
-        require(vaults[_creator][0]==_creator);
-        vaults[_creator].push(_participant);
+        shards[_creator][_participant] = _shard;
+        if(_creator!=_participant){
+            cosigners[_creator][_participant] = vaults[_creator].length;
+            vaults[_creator].push(_participant);
+        }
         emit NewParticipant(_creator, creators[_participant]);
     }
 
     /**
         This function removes a participant in a vault that belongs to its creator
         @param _creator vault creator's username, eg creator@email.com
-        @param _id vault creator's unique id using which it can be reached, eg, its Google/APNS token
         @param _participant vault participant's username, eg participant@email.com
      */
-    function removeParticipant(bytes32 _creator, bytes32 _id, bytes32 _participant) external {
-        require(vaults[_creator].length>0);
-        require(vaults[_creator][0]==_creator);
-        require(creators[_creator]==_id);
-        for(uint256 i=0; i<vaults[_creator].length; i++){
-            if(vaults[_creator][i]==_participant){
-                delete vaults[_creator][i];
-                delete shards[_creator][_participant];
-                delete pins[_creator][_participant];
-            }
+    function removeParticipant(bytes32 _creator, bytes32 _participant) onlySigner(_creator, msg.sender) external {
+        if(cosigners[_creator][_participant] > 0){
+            delete vaults[_creator][cosigners[_creator][_participant]];
+            delete shards[_creator][_participant];
+            delete pins[_creator][_participant];
         }
     } 
 
@@ -96,41 +109,27 @@ contract Vault is IVault, Ownable {
         This function confirms a participant in the vault when the participant sends its private key shard and PIN
         @param _creator the vault's creator (eg, creator@email.com)
         @param _participant the vault's participant (eg, participant@email.com)
-        @param _id vault participant's unique id using which it can be reached, eg, its Google/APNS token
-        @param _shard the private key shard of the participant
         @param _pin the PIN number of the participant
      */
-    function confirmParticipant(bytes32 _creator, bytes32 _participant, bytes32 _id, string calldata _shard, uint256 _pin) external {
+    function confirmParticipant(bytes32 _creator, bytes32 _participant, uint256 _pin) onlySigner(_participant, msg.sender) external {
         require(vaults[_creator].length>0);
-        require(creators[_participant]==_id);
-        for(uint256 i=0; i<vaults[_creator].length; i++){
-            if(vaults[_creator][i]==_participant){
-                shards[_creator][_participant] = _shard;
-                pins[_creator][_participant] = _pin;
-            }
-        }
+        pins[_creator][_participant] = _pin;
     }
 
     /**
         This function defines the number of participants required to co-sign a transaction
         @param _creator the vault's creator (eg, creator@email.com)
-        @param _id vault creator's unique id using which it can be reached, eg, its Google/APNS token
         @param _minParticipants the minimum number of co-signers
      */
-    function defineQuorum(bytes32 _creator, bytes32 _id, uint256 _minParticipants) external {
-        require(vaults[_creator].length>0);
-        require(vaults[_creator][0]==_creator);
-        require(creators[_creator]==_id);
+    function defineQuorum(bytes32 _creator, uint256 _minParticipants) onlySigner(_creator, msg.sender) external {
         quorum[_creator] = _minParticipants;
     }
 
     /**
         This function prompts participants to co-sign a transaction on the vault (ie, the creator's address secured by the quorum of participants)
         @param _creator the vault's creator (eg, creator@email.com)
-        @param _id vault creator's unique id using which it can be reached, eg, its Google/APNS token
      */
-    function promptSignatures(bytes32 _creator, bytes32 _id) external {
-        require(creators[_creator]==_id);
+    function promptSignatures(bytes32 _creator) onlySigner(_creator, msg.sender) external {
         bytes32[] memory cs = new bytes32[](vaults[_creator].length);
         uint256 txid = now;
         transaction memory currentTx = transaction({
@@ -147,13 +146,11 @@ contract Vault is IVault, Ownable {
         This function lets a participant co-sign a transaction
         @param _creator the vault's creator (eg, creator@email.com)
         @param _participant the vault's participant (eg, participant@email.com)
-        @param _id vault participant's unique id using which it can be reached, eg, its Google/APNS token
         @param _tx transaction identifier
         @param _pin the PIN number of the signer (participant)
      */
-    function signTransaction(bytes32 _creator, bytes32 _participant, bytes32 _id, uint256 _tx, uint256 _pin) external {
+    function signTransaction(bytes32 _creator, bytes32 _participant, uint256 _tx, uint256 _pin) onlySigner(_participant, msg.sender) external {
         require(pins[_creator][_participant]==_pin);
-        require(creators[_participant]==_id);
         for(uint i=0; i<transactions[_creator].length; i++){
             if(transactions[_creator][i].datetime==_tx){
                 for(uint j=0; j<transactions[_creator][i].cosigners.length; j++){
@@ -170,13 +167,11 @@ contract Vault is IVault, Ownable {
     /**
         This function lets the creator check if quorum has been achieved for a particular transaction
         @param _creator vault creator's username, eg creator@email.com
-        @param _id vault creator's unique id using which it can be reached, eg, its Google/APNS token
         @param _participant vault participant's username, eg participant@email.com
         @param _txid transaction identifier
      */
-    function checkQuorum(bytes32 _creator, bytes32 _id, bytes32 _participant, uint256 _txid) external view returns(bool){
+    function checkQuorum(bytes32 _creator, bytes32 _participant, uint256 _txid) onlySigner(_creator, msg.sender) external view returns(bool){
         require(pins[_creator][_participant]!=0);
-        require(creators[_creator]==_id);
         bool _quorum = false;
         for(uint i=0; i<transactions[_creator].length; i++){
             if(transactions[_creator][i].datetime==_txid){
@@ -193,11 +188,9 @@ contract Vault is IVault, Ownable {
     /**
         This function gets the shard for a participant
         @param _creator vault creator's username, eg creator@email.com
-        @param _id vault creator's unique id using which it can be reached, eg, its Google/APNS token
         @param _txid transaction identifier 
      */
-    function getShards(bytes32 _creator, bytes32 _id, uint256 _txid) external view returns(string[] memory){
-        require(creators[_creator]==_id);
+    function getShards(bytes32 _creator, uint256 _txid) onlySigner(_creator, msg.sender) external view returns(string[] memory){
         for(uint i=0; i<transactions[_creator].length; i++){
             if(transactions[_creator][i].datetime==_txid){
                 if(transactions[_creator][i].cosigners.length >= quorum[_creator]){

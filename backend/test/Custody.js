@@ -20,10 +20,10 @@ contract("Vault contract testing", async (accounts) => {
     
         var vault = await Vault.deployed();
 
-        await vault.createVault(ethers.utils.formatBytes32String("creator@email.com"), ethers.utils.formatBytes32String("abc1234"))
+        await vault.createVault(ethers.utils.formatBytes32String("creator@email.com"), ethers.utils.formatBytes32String("abc1234"), {from: accounts[1]})
         .then(async()=>{
             console.log("Created a vault");
-            await vault.createVault(ethers.utils.formatBytes32String("participant@email.com"), ethers.utils.formatBytes32String("xyz1234"))
+            await vault.createVault(ethers.utils.formatBytes32String("participant@email.com"), ethers.utils.formatBytes32String("xyz1234"), {from: accounts[2]})
             .then(async()=>{
                 console.log("Created a vault");
                 let randomWallet = ethers.Wallet.createRandom();
@@ -32,42 +32,49 @@ contract("Vault contract testing", async (accounts) => {
                 console.log("Key share 1: "+shares[0]);
                 console.log("Key share 2: "+shares[1]);
                 console.log("Key share 3: "+shares[2]);
-                await vault.defineQuorum(ethers.utils.formatBytes32String("creator@email.com"), ethers.utils.formatBytes32String("abc1234"),'2')
+                await vault.defineQuorum(ethers.utils.formatBytes32String("creator@email.com"), '2', {from: accounts[1]})
                 .then(async()=>{
                     console.log("Defined quorum");
-                    await vault.addParticipant(ethers.utils.formatBytes32String("creator@email.com"), ethers.utils.formatBytes32String("abc1234"), ethers.utils.formatBytes32String("participant@email.com"))
+                    await vault.addParticipant(ethers.utils.formatBytes32String("creator@email.com"), ethers.utils.formatBytes32String("creator@email.com"), shares[0], {from: accounts[1]})
                     .then(async()=>{
-                        console.log("Added participant");
-                        await vault.confirmParticipant(ethers.utils.formatBytes32String("creator@email.com"), ethers.utils.formatBytes32String("creator@email.com"), ethers.utils.formatBytes32String("abc1234"), shares[0], '1234')
+                        await vault.addParticipant(ethers.utils.formatBytes32String("creator@email.com"), ethers.utils.formatBytes32String("participant@email.com"), shares[1], {from: accounts[1]})
                         .then(async()=>{
-                            console.log("Set shard for participant 1");
-                            await vault.confirmParticipant(ethers.utils.formatBytes32String("creator@email.com"), ethers.utils.formatBytes32String("participant@email.com"), ethers.utils.formatBytes32String("xyz1234"), shares[1], '5678')
+                            console.log("Added participants");
+                            await vault.confirmParticipant(ethers.utils.formatBytes32String("creator@email.com"), ethers.utils.formatBytes32String("creator@email.com"), '1234', {from: accounts[1]})
                             .then(async()=>{
-                                console.log("Set shard for participant 2");
-                                await vault.promptSignatures(ethers.utils.formatBytes32String("creator@email.com"), ethers.utils.formatBytes32String("abc1234"))
+                                console.log("Set shard for participant 1");
+                                await vault.confirmParticipant(ethers.utils.formatBytes32String("creator@email.com"), ethers.utils.formatBytes32String("participant@email.com"), '5678', {from: accounts[2]})
                                 .then(async()=>{
-                                    await getFirstEvent(vault.NewTransaction({fromBlock:1}));
-                                    const rcpt = await vault.getPastEvents('NewTransaction', {fromBlock:'latest'});
-                                    const txid = rcpt[0].returnValues.txid; 
-                                    console.log("Prompting participants to co-sign transaction "+txid);
-                                    await vault.signTransaction(ethers.utils.formatBytes32String("creator@email.com"), ethers.utils.formatBytes32String("creator@email.com"), ethers.utils.formatBytes32String("abc1234"), txid, '1234')
+                                    console.log("Set shard for participant 2");
+                                    await vault.promptSignatures(ethers.utils.formatBytes32String("creator@email.com"), {from: accounts[1]})
                                     .then(async()=>{
-                                        console.log("Transaction signed by participant 1");
-                                        await vault.signTransaction(ethers.utils.formatBytes32String("creator@email.com"), ethers.utils.formatBytes32String("participant@email.com"), ethers.utils.formatBytes32String("xyz1234"), txid, '5678')
+                                        await getFirstEvent(vault.NewTransaction({fromBlock:1}));
+                                        const rcpt = await vault.getPastEvents('NewTransaction', {fromBlock:'latest'});
+                                        const txid = rcpt[0].returnValues.txid; 
+                                        console.log("Prompting participants to co-sign transaction "+txid);
+                                        await vault.signTransaction(ethers.utils.formatBytes32String("creator@email.com"), ethers.utils.formatBytes32String("creator@email.com"), txid, '1234', {from: accounts[1]})
                                         .then(async()=>{
-                                            console.log("Transaction signed by participant 2");
-                                            await vault.checkQuorum(ethers.utils.formatBytes32String("creator@email.com"), ethers.utils.formatBytes32String("abc1234"), ethers.utils.formatBytes32String("participant@email.com"), txid)
-                                            .then(async(res)=>{
-                                                console.log("Is quorum reached ? "+res);
-                                                if(res){
-                                                    await vault.getShards(ethers.utils.formatBytes32String("creator@email.com"), ethers.utils.formatBytes32String("abc1234"), txid)
-                                                    .then(async(shards)=>{
-                                                        console.log("Shards received are "+shards);
-                                                        var comb = secrets.combine(shards);
-                                                        console.log("Private key reconstructed from shards is "+comb);
-                                                        console.log("Is equal to the original key ? "+ (comb === randomWallet.privateKey.substring(2)));
+                                            console.log("Transaction signed by participant 1");
+                                            await vault.signTransaction(ethers.utils.formatBytes32String("creator@email.com"), ethers.utils.formatBytes32String("participant@email.com"), txid, '5678', {from: accounts[2]})
+                                            .then(async()=>{
+                                                console.log("Transaction signed by participant 2");
+                                                await vault.checkQuorum(ethers.utils.formatBytes32String("creator@email.com"), ethers.utils.formatBytes32String("participant@email.com"), txid, {from: accounts[1]})
+                                                .then(async(res)=>{
+                                                    console.log("Is quorum reached ? "+res);
+                                                    if(res){
+                                                        await vault.getShards(ethers.utils.formatBytes32String("creator@email.com"), txid, {from: accounts[1]})
+                                                        .then(async(shards)=>{
+                                                            console.log("Shards received are "+shards);
+                                                            var comb = secrets.combine(shards);
+                                                            console.log("Private key reconstructed from shards is "+comb);
+                                                            console.log("Is equal to the original key ? "+ (comb === randomWallet.privateKey.substring(2)));
+                                                        })
+                                                    }
+                                                    await vault.getCreator(ethers.utils.formatBytes32String("creator@email.com"))
+                                                    .then(async(id)=>{
+                                                        console.log("Messaging token of creator is "+id);
                                                     })
-                                                }
+                                                })
                                             })
                                         })
                                     })
