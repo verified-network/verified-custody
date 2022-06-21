@@ -135,6 +135,7 @@ function App() {
             />
             <AddParticipant
               custodyContract={custodyContract}
+              custodyContractParticipant={custodyContractParticipant}
               participantAdded={participantAdded}
               setParticipantAdded={setParticipantAdded}
               setParticipant2Confirmed={setParticipant2Confirmed}

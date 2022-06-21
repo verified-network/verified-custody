@@ -29,7 +29,7 @@ function AddParticipant(props) {
 
   const confirmParticipant = async () => {
     setConfirmLoading(true);
-    props.custodyContract.confirmParticipant().then(res => {
+    props.custodyContractParticipant.confirmParticipant().then(res => {
         console.log("App.js custodyContract.confirmParticipant", res);
         if(res.status) {
           NotificationManager.error(res.message);
