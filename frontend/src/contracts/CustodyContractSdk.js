@@ -60,24 +60,21 @@ class CustodyContract extends index_1.VerifiedContract {
         await this.validateInput(index_1.DATATYPES.STRING, _id);
         return this.callContract(FUNCTIONS.PROMPTSIGNATURES, this.sanitiseInput(index_1.DATATYPES.BYTE32, _creator), this.sanitiseInput(index_1.DATATYPES.BYTE32, _id), options);
     }
-    async signTransaction(_creator, _participant, _id, _tx, _pin, options) {
+    async signTransaction(_creator, _participant, _tx, _pin, options) {
         await this.validateInput(index_1.DATATYPES.STRING, _creator);
-        await this.validateInput(index_1.DATATYPES.STRING, _id);
         await this.validateInput(index_1.DATATYPES.STRING, _participant);
-        return this.callContract(FUNCTIONS.SIGNTRANSACTION, this.sanitiseInput(index_1.DATATYPES.BYTE32, _creator), this.sanitiseInput(index_1.DATATYPES.BYTE32, _participant), this.sanitiseInput(index_1.DATATYPES.BYTE32, _id), _tx, _pin, options);
+        return this.callContract(FUNCTIONS.SIGNTRANSACTION, this.sanitiseInput(index_1.DATATYPES.BYTE32, _creator), this.sanitiseInput(index_1.DATATYPES.BYTE32, _participant), _tx, _pin, options);
     }
-    async checkQuorum(_creator, _id, _participant, _txid, options) {
+    async checkQuorum(_creator, _participant, _txid, options) {
         await this.validateInput(index_1.DATATYPES.STRING, _creator);
-        await this.validateInput(index_1.DATATYPES.STRING, _id);
         await this.validateInput(index_1.DATATYPES.STRING, _participant);
         await this.validateInput(index_1.DATATYPES.STRING, _txid);
-        return this.callContract(FUNCTIONS.CHECKQUORUM, this.sanitiseInput(index_1.DATATYPES.BYTE32, _creator), this.sanitiseInput(index_1.DATATYPES.BYTE32, _id), this.sanitiseInput(index_1.DATATYPES.BYTE32, _participant), this.sanitiseInput(index_1.DATATYPES.BYTE32, _txid), options);
+        return this.callContract(FUNCTIONS.CHECKQUORUM, this.sanitiseInput(index_1.DATATYPES.BYTE32, _creator), this.sanitiseInput(index_1.DATATYPES.BYTE32, _participant), this.sanitiseInput(index_1.DATATYPES.BYTE32, _txid), options);
     }
-    async getShards(_creator, _id, _txid, options) {
+    async getShards(_creator, _txid, options) {
         await this.validateInput(index_1.DATATYPES.STRING, _creator);
-        await this.validateInput(index_1.DATATYPES.STRING, _id);
         await this.validateInput(index_1.DATATYPES.STRING, _txid);
-        return this.callContract(FUNCTIONS.GETSHARDS, this.sanitiseInput(index_1.DATATYPES.BYTE32, _creator), this.sanitiseInput(index_1.DATATYPES.BYTE32, _id), this.sanitiseInput(index_1.DATATYPES.BYTE32, _txid), options);
+        return this.callContract(FUNCTIONS.GETSHARDS, this.sanitiseInput(index_1.DATATYPES.BYTE32, _creator), this.sanitiseInput(index_1.DATATYPES.BYTE32, _txid), options);
     }
 
     notifyNewTransaction(callback) {
