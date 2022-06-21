@@ -23,7 +23,7 @@ function SignTransactionCreator(props) {
 
   return (
       <div className='mb-2 mt-3 flex align-items-center'>
-        <Button disabled={loading || props.disabled} onClick={signTransaction}>Sign Transaction Participant 1 {loading ? <Spinner animation="border" size="sm" /> : null}</Button> 
+        <Button disabled={loading || !props.txid} onClick={signTransaction}>Sign Transaction Participant 1 {loading ? <Spinner animation="border" size="sm" /> : null}</Button> 
         {props.signTransactionCreatorDone ? <span className='text-success'> Signed by creator</span> : null}
       </div>
   );

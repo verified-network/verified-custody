@@ -1,4 +1,5 @@
 import { CustodyContract, Provider, VerifiedWallet } from '@verified-network/verified-sdk';
+const ethers = require("ethers");
 
 const mnemonic = 'ozone chief cave farm damage sweet inhale display inch purity leader brick';
 export const API_KEY = '7465b99634184765843e4f232545788f';
@@ -34,11 +35,13 @@ class CustodyContractServiceCreator {
   }
 
   createVault() {
-    console.log("CustodyContractServiceCreator", {
-      creatorEmail: configs.creatorEmail,
-      creatorId: configs.creatorId
-    })
-    return this.vault.createVault(configs.creatorEmail, configs.creatorId, {from: this.userAddress});
+    // const email = ethers.utils.formatBytes32String("creator@email.com");
+    // const id = ethers.utils.formatBytes32String("abc1234");
+    // console.log("CustodyContractServiceCreator", {
+    //   email,
+    //   id
+    // })
+    return this.vault.createVault(configs.creatorEmail, configs.creatorId);
   }
 
   defineQuorum(_minParticipants) {
@@ -50,7 +53,7 @@ class CustodyContractServiceCreator {
   }
 
   confirmParticipant() {
-    return this.vault.confirmParticipant(configs.creatorEmail, configs.creatorEmail, configs.creatorId, {from: this.userAddress});
+    return this.vault.confirmParticipant(configs.creatorEmail, configs.creatorEmail, configs.creatorPin, {from: this.userAddress});
   }
 
   promptSignatures() {
@@ -62,7 +65,7 @@ class CustodyContractServiceCreator {
   }
 
   checkQuorum(_txid) {
-    return this.vault.checkQuorum(configs.creatorEmail, configs.participantEmail, configs.participantEmail, _txid, {from: this.userAddress});
+    return this.vault.checkQuorum(configs.creatorEmail, configs.participantEmail, _txid, {from: this.userAddress});
   }
 
   getShards(_txid) {

@@ -33,9 +33,8 @@ function App() {
   const [participant1Confirmed, setParticipant1Confirmed] = useState(false);
   const [participant2Confirmed, setParticipant2Confirmed] = useState(false);
   const [promptSignaturesDone, setPromptSignaturesDone] = useState(false);
-  const [signTransactionCreatorDone, setSignTransactionCreatorDone] = useState(false);
-  const [signTransactionParticipantDone, setSignTransactionParticipantDone] = useState(false);
   const [checkQuorumDone, setCheckQuorumDone] = useState(false);
+  const [addSignTransactionListener, setaddSignTransactionListener] = useState();
 
   useEffect(() => {
     const contract = new CustodyContractServiceCreator();
@@ -47,8 +46,25 @@ function App() {
   }, []);
 
   useEffect(() => {
+    // if (custodyContractParticipant) {
+    //   const vault = custodyContractParticipant.getVault();
+
+    //   vault.notifyNewParticipant((res) => {
+    //     const result = res.response.result;
+    //     console.log("App.js notifyNewParticipant custodyContractParticipant", res);
+    //   })
+    // }
+  }, [custodyContractParticipant]);
+
+  useEffect(() => {
     if (custodyContract) {
       createShards();
+      // const vault = custodyContract.getVault();
+
+      // vault.notifyNewParticipant((res) => {
+      //   const result = res.response.result;
+      //   console.log("App.js notifyNewParticipant custodyContract", res);
+      // })
     }
   }, [custodyContract]);
 
@@ -62,20 +78,20 @@ function App() {
   };
 
   const promptSignatures = async () => {
-    const vault = custodyContract.getVault();
-    console.log("App.js promptSignatures", vault);
+    // const vault = custodyContract.getVault();
+    // console.log("App.js promptSignatures", vault.getEvent);
 
-    vault.notifyNewTransaction((res) => {
-      console.log("App.js custodyContract.NewTransaction", res);
-      setTxid(res.returnValues.txid);
-    });
+    // vault.getEvent('NewTransaction', (res) => {
+    //   console.log("App.js custodyContract.NewTransaction", res);
+    //   setTxid(res.returnValues.txid);
+    // });
   };
 
   return (
     <Container className="p-4 col-12">
       <div>
       <div>
-        <b>Private Key: </b> {wallet?.privateKey}
+        {/* <b>Private Key: </b> {wallet?.privateKey} */}
       </div>
         {shares.map((share, index) => {
           return (
@@ -113,6 +129,7 @@ function App() {
               custodyContract={custodyContract}
               participantAdded={participantCreatorAdded}
               setParticipantAdded={setParticipantCreatorAdded}
+              setParticipant1Confirmed={setParticipant1Confirmed}
               disabled={!quorumDefined}
               shares={shares}
             />
@@ -120,42 +137,49 @@ function App() {
               custodyContract={custodyContract}
               participantAdded={participantAdded}
               setParticipantAdded={setParticipantAdded}
+              setParticipant2Confirmed={setParticipant2Confirmed}
               disabled={!quorumDefined}
               shares={shares}
             />
-            <ParticipantConfirm1
+            {/* <ParticipantConfirm1
               custodyContract={custodyContract}
               participant1Confirmed={participant1Confirmed}
               setParticipant1Confirmed={setParticipant1Confirmed}
               shares={shares}
               disabled={!participantAdded}
-            />
+            /> */}
             <PromptSignatures
               custodyContract={custodyContract}
+              custodyContractParticipant={custodyContractParticipant}
               promptSignaturesDone={promptSignaturesDone}
               setPromptSignaturesDone={setPromptSignaturesDone}
               shares={shares}
-              disabled={!participant2Confirmed}
+              disabled={!participantAdded}
               promptSignatures={promptSignatures}
+              setTxid={setTxid}
+              txid={txid}
+              setaddSignTransactionListener={setaddSignTransactionListener}
             />
-            <SignTransactionCreator
+            {/* <SignTransactionCreator
               custodyContract={custodyContract}
               txid={txid}
               signTransactionCreatorDone={signTransactionCreatorDone}
               setSignTransactionCreatorDone={setSignTransactionCreatorDone}
-            />
-            <CheckQuorum
+            /> */}
+             <CheckQuorum
               custodyContract={custodyContract}
               txid={txid}
               checkQuorumDone={checkQuorumDone}
               setCheckQuorumDone={setCheckQuorumDone}
+              addSignTransactionListener={addSignTransactionListener}
+              privateKey={wallet?.privateKey}
             />
-            <GetShards
+            {/*<GetShards
               custodyContract={custodyContract}
               txid={txid}
               checkQuorumDone={checkQuorumDone}
               setCheckQuorumDone={setCheckQuorumDone}
-            />
+            /> */}
           </div>
           <div style={{ flex: "1" }} className="">
             <div className="my-2">
@@ -166,19 +190,19 @@ function App() {
               vaultCreated={vaultCreatedParticipant}
               setVaultCreated={setVaultCreatedParticipant}
             />
-            <ParticipantConfirm2
+            {/* <ParticipantConfirm2
               custodyContract={custodyContractParticipant}
               participant2Confirmed={participant2Confirmed}
               setParticipant2Confirmed={setParticipant2Confirmed}
               shares={shares}
-              disabled={!participant1Confirmed}
-            />
-            <SignTransactionsignParticipant
+              disabled={!participantCreatorAdded}
+            /> */}
+            {/* <SignTransactionsignParticipant
               custodyContract={custodyContractParticipant}
               txid={txid}
               signTransactionParticipantDone={signTransactionParticipantDone}
               setSignTransactionParticipantDone={setSignTransactionParticipantDone}
-            />
+            /> */}
           </div>
         </div>
       </div>

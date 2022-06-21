@@ -24,7 +24,7 @@ function DefineQuorum(props) {
   return (
       <div className='mb-2 mt-3 flex align-items-center'>
         <Button 
-          // disabled={loading || props.disabled} 
+          disabled={loading || props.disabled} 
           onClick={defineQuorum}>Define Quorum {loading ? <Spinner animation="border" size="sm" /> : null}</Button> 
         {props.quorumDefined ? <span className='text-success'> Quorum Defined 2</span> : null}
       </div>

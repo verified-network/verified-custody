@@ -6,7 +6,7 @@ const mnemonic = 'recycle unaware fruit danger poverty card tag river protect so
 class CustodyContractServiceParticipant {
   constructor() {
     this.wallet = VerifiedWallet.importWallet(mnemonic).setProvider(Provider.infuraProvider(configs.network, API_KEY));
-    console.log('CustodyContractServiceParticipant constructor wallet', this.wallet);
+    // console.log('CustodyContractServiceParticipant constructor wallet', this.wallet);
     
     this.userAddress =this.wallet.address;
     this.vault = new CustodyContract(this.wallet);
@@ -21,7 +21,7 @@ class CustodyContractServiceParticipant {
   }
 
   confirmParticipant() {
-    return this.vault.confirmParticipant(configs.creatorEmail, configs.participantEmail, configs.participantId, {from: this.userAddress});
+    return this.vault.confirmParticipant(configs.creatorEmail, configs.participantEmail, configs.participantPin);
   }
 
   signTransaction(_tx) {
