@@ -4,15 +4,16 @@ import { NotificationManager } from 'react-notifications';
 
 function DefineQuorum(props) {
     const [loading, setLoading] = useState(false);
+    const [quorumDefined, setQuorumDefined] = useState(false);
 
   const defineQuorum = async () => {
     setLoading(true);
-    props.custodyContract.defineQuorum('2').then(res => {
+    props.custodyContract.defineQuorum(props.minimumSigners.toString()).then(res => {
         console.log("App.js custodyContract.defineQuorum", res);
         if(res.status) {
           NotificationManager.error(res.message);
         } else {
-          props.setQuorumDefined(true);
+          setQuorumDefined(true);
         }
       }).catch(error => {
         console.log("App.js custodyContract.defineQuorum error", error);
@@ -26,7 +27,7 @@ function DefineQuorum(props) {
         <Button 
           disabled={loading || props.disabled} 
           onClick={defineQuorum}>Define Quorum {loading ? <Spinner animation="border" size="sm" /> : null}</Button> 
-        {props.quorumDefined ? <span className='text-success'> Quorum Defined 2</span> : null}
+        {quorumDefined ? <span className='text-success'> Quorum Defined {props.minimumSigners}</span> : null}
       </div>
   );
 }

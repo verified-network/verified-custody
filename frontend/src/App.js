@@ -1,77 +1,104 @@
 import "./App.css";
 import { useEffect, useState } from "react";
-import 'react-notifications/lib/notifications.css';
-import {NotificationContainer} from 'react-notifications';
-import CustodyContractServiceCreator, { configs } from "./contracts/CustodyContractServiceCreator";
+import "react-notifications/lib/notifications.css";
+import { NotificationContainer } from "react-notifications";
+import CustodyContractServiceCreator, {
+} from "./contracts/CustodyContractServiceCreator";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { Container } from "react-bootstrap";
+import { Container, Spinner } from "react-bootstrap";
 import CreateVault from "./buttons/createVault";
 import DefineQuorum from "./buttons/defineQuorum";
-import AddParticipantCreator from "./buttons/addParticipantCreator";
 import PromptSignatures from "./buttons/promptSignatures";
-import CustodyContractServiceParticipant from "./contracts/CustodyContractServiceParticipant";
-import CreateVaultParticipant from "./buttons/createVaultParticipant";
 import AddParticipant from "./buttons/addParticipant";
-import CheckQuorum from "./buttons/checkQuorum";
 import GetShards from "./buttons/getShards";
+import TotalSignersModal from "./components/totalSignersModal";
 
-const isDev = process.env.NODE_ENV === 'development';
+export const isDev = process.env.NODE_ENV === "development";
+
+const signersWallets = {
+  0: "ozone chief cave farm damage sweet inhale display inch purity leader brick", // 0x6d1965B856fc6ca7d322178b4554374DE76472A6
+  1: "recycle unaware fruit danger poverty card tag river protect sock asset fabric", // 0x8e83c3c8EabC4dfCcc590A6c3C661BAC2a2fbf52
+  2: "distance crisp session broom rail valley abuse eternal gorilla ghost record someone", // 0x1AF711dF8b66Da986095A646Ceeb72EbA715CAd2
+  3: "dinosaur asset primary face network obvious inhale final benefit major pottery tree", // 0x8226bbAEb1B8818977e93928599aa3A3ff31a442
+  4: "marriage swift hobby kitchen tip gasp exist path hundred vanish describe renew", // 0x019f2D77e4a8CA568fC8B2AB17f3C5a6aD18214c
+};
 
 function App() {
-  const [custodyContract, setCustodyContract] = useState();
-  const [custodyContractParticipant, setCustodyContractParticipant] = useState();
+  const [totalSigners, setTotalSigners] = useState();
+  const [signers, setSigners] = useState({});
+  const [minimumSigners, setMinimumSigners] = useState();
+
   const [wallet, setWallet] = useState();
   const [shares, setShares] = useState([]);
-  const [txid, setTxid] = useState("");
-  const [vaultCreated, setVaultCreated] = useState(false);
-  const [vaultCreatedParticipant, setVaultCreatedParticipant] = useState(false);
-  const [quorumDefined, setQuorumDefined] = useState(false);
-  const [participantAdded, setParticipantAdded] = useState(false);
-  const [participantCreatorAdded, setParticipantCreatorAdded] = useState(false);
-  const [promptSignaturesDone, setPromptSignaturesDone] = useState(false);
-  const [checkQuorumDone, setCheckQuorumDone] = useState(false);
-  const [addSignTransactionListener, setaddSignTransactionListener] = useState();
+
+  const signersArray = Object.values(signers);
 
   useEffect(() => {
-    const contract = new CustodyContractServiceCreator();
-    const wallet = contract.getWallet();
-    setWallet(wallet);
-    setCustodyContract(contract);
-    const contractParticipant = new CustodyContractServiceParticipant();
-    setCustodyContractParticipant(contractParticipant);
-  }, []);
+    if(signersArray.length && !wallet) {
+      const contract = new CustodyContractServiceCreator(signersArray[0].mnemonic);
+      const wallet = contract.getWallet();
+      setWallet(wallet);
+    }
+  }, [signersArray]);
 
   useEffect(() => {
-    if (custodyContract) {
+    if (signers && minimumSigners && wallet) {
       createShards();
     }
-  }, [custodyContract]);
+  }, [signers, minimumSigners, wallet]);
 
   const createShards = () => {
-    console.log("PrivateKey", window.secrets);
-    var shares = window.secrets.share(wallet.privateKey.substring(2), 3, 2);
+    var shares = window.secrets.share(
+      wallet.privateKey.substring(minimumSigners),
+      totalSigners,
+      minimumSigners
+    );
     setShares(shares);
-    console.log("Key share 1: " + shares[0]);
-    console.log("Key share 2: " + shares[1]);
-    console.log("Key share 3: " + shares[2]);
+    console.log("PrivateKey", shares);
   };
 
-  const promptSignatures = async () => {
-    // const vault = custodyContract.getVault();
-    // console.log("App.js promptSignatures", vault.getEvent);
-
-    // vault.getEvent('NewTransaction', (res) => {
-    //   console.log("App.js custodyContract.NewTransaction", res);
-    //   setTxid(res.returnValues.txid);
-    // });
+  const onChangeTotalSigners = (value, minimumSigners) => {
+    const signers = {};
+    const totalSigners = Number(value);
+    const signersWalletsKeys = Object.keys(signersWallets);
+    signersWalletsKeys.map((s, i) => {
+      if (totalSigners >= i + 1) {
+        signers[s] = {
+          mnemonic: signersWallets[s],
+          email: !i ? "creator@email.com" : `signer${s}@email.com`,
+          id: `id_${i}`,
+          pin: `123${i}`
+        };
+      }
+    });
+    setSigners(signers);
+    setTotalSigners(value);
+    setMinimumSigners(minimumSigners);
   };
+
+  if (!totalSigners) {
+    return (
+      <TotalSignersModal
+        totalSigners={totalSigners}
+        setTotalSigners={onChangeTotalSigners}
+      />
+    );
+  }
+
+  if(!shares.length || !wallet || !signersArray.length || !totalSigners) {
+    return <div style={{height: '100vh'}} className="col-12 d-flex justify-content-center align-items-center">
+      <Spinner animation="border" />
+    </div>
+  }
+
+  console.log("App.js Render", { totalSigners, signers, shares });
 
   return (
     <Container className="p-4 col-12">
       <div>
-      <div>
-        {/* <b>Private Key: </b> {wallet?.privateKey} */}
-      </div>
+        <div>
+          <b>Private Key: </b> {wallet?.privateKey}
+        </div>
         {shares.map((share, index) => {
           return (
             <div key={share}>
@@ -81,108 +108,67 @@ function App() {
         })}
       </div>
 
-      <div className=" col-12 mt-4">
-        <div className="d-flex justify-around">
-          <div style={{ flex: "1" }} className="d-flex justify-content-center">
-            <h4>Creator ({configs.creatorEmail})</h4>
-          </div>
-          <div style={{ flex: "1" }} className="d-flex justify-content-center">
-            <h4>Participant ({configs.participantEmail})</h4>
-          </div>
-        </div>
-        <hr />
-        <div className="d-flex justify-around">
-          <div style={{ flex: "1" }} className="border-end me-4">
-            <CreateVault
-              custodyContract={custodyContract}
-              vaultCreated={vaultCreated}
-              setVaultCreated={setVaultCreated}
-            />
-            <DefineQuorum
-              custodyContract={custodyContract}
-              quorumDefined={quorumDefined}
-              setQuorumDefined={setQuorumDefined}
-              disabled={!vaultCreated}
-            />
-            <AddParticipantCreator
-              custodyContract={custodyContract}
-              participantAdded={participantCreatorAdded}
-              setParticipantAdded={setParticipantCreatorAdded}
-              disabled={!quorumDefined}
-              shares={shares}
-            />
-            <AddParticipant
-              custodyContract={custodyContract}
-              custodyContractParticipant={custodyContractParticipant}
-              participantAdded={participantAdded}
-              setParticipantAdded={setParticipantAdded}
-              disabled={!quorumDefined}
-              shares={shares}
-            />
-            {/* <ParticipantConfirm1
-              custodyContract={custodyContract}
-              participant1Confirmed={participant1Confirmed}
-              shares={shares}
-              disabled={!participantAdded}
-            /> */}
-            <PromptSignatures
-              custodyContract={custodyContract}
-              custodyContractParticipant={custodyContractParticipant}
-              promptSignaturesDone={promptSignaturesDone}
-              setPromptSignaturesDone={setPromptSignaturesDone}
-              shares={shares}
-              disabled={!participantAdded}
-              promptSignatures={promptSignatures}
-              setTxid={setTxid}
-              txid={txid}
-              setaddSignTransactionListener={setaddSignTransactionListener}
-            />
-            {/* <SignTransactionCreator
-              custodyContract={custodyContract}
-              txid={txid}
-              signTransactionCreatorDone={signTransactionCreatorDone}
-              setSignTransactionCreatorDone={setSignTransactionCreatorDone}
-            /> */}
-             <CheckQuorum
-              custodyContract={custodyContract}
-              txid={txid}
-              checkQuorumDone={checkQuorumDone}
-              setCheckQuorumDone={setCheckQuorumDone}
-              addSignTransactionListener={addSignTransactionListener}
-              privateKey={wallet?.privateKey}
-            />
-            {/* <GetShards
-              custodyContract={custodyContract}
-              txid={txid}
-              checkQuorumDone={checkQuorumDone}
-              setCheckQuorumDone={setCheckQuorumDone}
-            /> */}
-          </div>
-          <div style={{ flex: "1" }} className="">
-            <div className="my-2">
-              <div>txid: {txid}</div>
+      <div className="col-12 mt-4 d-flex flex-wrap">
+        {signersArray.map((item, index) => {
+          const isCreator = !index;
+          const creator = signersArray[0];
+          const custodyContract = new CustodyContractServiceCreator(item.mnemonic, creator.email, item.email, item.id);
+          return (
+            <div
+              key={item.email}
+              className={`col-12 col-md-6 col-lg-4 border-bottom py-4 ${
+                index + 1 === signersArray.length ? "" : "border-end"
+              }`}
+            >
+              <div className="d-flex justify-around">
+                <div
+                  style={{ flex: "1" }}
+                  className="d-flex justify-content-center "
+                >
+                  <h4>
+                    {isCreator ? "Creator" : `Signer ${index}`} ({item.email})
+                  </h4>
+                </div>
+              </div>
+              <div className="d-flex flex-column ps-4">
+                <CreateVault
+                  custodyContract={custodyContract}
+                  {...item}
+                />
+               {isCreator ? <>
+                <DefineQuorum
+                  custodyContract={custodyContract}
+                  minimumSigners={minimumSigners}
+                  {...item}
+                  // disabled={!vaultCreated}
+                />
+                 {signersArray.map((participant, i) => {
+                  const custodyContractParticipant = new CustodyContractServiceCreator(participant.mnemonic, creator.email, participant.email, participant.id);
+                  return <AddParticipant
+                    key={i}
+                    custodyContract={custodyContract}
+                    custodyContractParticipant={custodyContractParticipant}
+                    shares={shares}
+                    participant={participant}
+                    index={i}
+                    share={shares[i]}
+                    isCreator={!i}
+                  />
+                 })}
+                <PromptSignatures
+                  custodyContract={custodyContract}
+                  signersArray={signersArray}
+                  minimumSigners={minimumSigners}
+                  privateKey={wallet.privateKey}
+                  {...item}
+                />
+                </> : null}
+              </div>
             </div>
-            <CreateVaultParticipant
-              custodyContract={custodyContractParticipant}
-              vaultCreated={vaultCreatedParticipant}
-              setVaultCreated={setVaultCreatedParticipant}
-            />
-            {/* <ParticipantConfirm2
-              custodyContract={custodyContractParticipant}
-              participant2Confirmed={participant2Confirmed}
-              shares={shares}
-              disabled={!participantCreatorAdded}
-            /> */}
-            {/* <SignTransactionsignParticipant
-              custodyContract={custodyContractParticipant}
-              txid={txid}
-              signTransactionParticipantDone={signTransactionParticipantDone}
-              setSignTransactionParticipantDone={setSignTransactionParticipantDone}
-            /> */}
-          </div>
-        </div>
+          );
+        })}
       </div>
-      <NotificationContainer/>
+      <NotificationContainer />
     </Container>
   );
 }

@@ -1,71 +1,130 @@
-import React, { useState } from 'react';
-import { Button, Spinner, Modal } from 'react-bootstrap';
-import { NotificationManager } from 'react-notifications';
-import { configs } from '../contracts/CustodyContractServiceCreator';
+import React, { useEffect, useState } from "react";
+import { Button, Spinner, Modal, Form } from "react-bootstrap";
+import { NotificationManager } from "react-notifications";
 
 function AddParticipant(props) {
-    const [loading, setLoading] = useState(false);
-    const [confirmLoading, setConfirmLoading] = useState(false);
-    const [show, setShow] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [confirmLoading, setConfirmLoading] = useState(false);
+  const [show, setShow] = useState(false);
+  const [participantAdded, setParticipantAdded] = useState(false);
+  const [pin, setPin] = useState(props.participant.pin);
+  const [error, setError] = useState("");
 
   const addParticipant = async () => {
     setLoading(true);
-    props.custodyContract.addParticipant(configs.participantEmail, props.shares[1]).then(res => {
-      console.log("App.js custodyContract.addParticipant", res);
+    props.custodyContract
+      .addParticipant(props.participant.email, props.share)
+      .then((res) => {
+        console.log("App.js custodyContract.addParticipant", res);
 
-      if(res.status) {
-        NotificationManager.error(res.message);
-      } else {
-        props.setParticipantAdded(true);
-        const vault = props.custodyContract.getVault();
-  
-        vault.notifyNewParticipant((res) => {
-          console.log("App.js notifyNewParticipant custodyContract", res);
-          handleShow();
-        })
-      }
-    }).catch(error => {
-      console.log("App.js custodyContract.addParticipant error", error);
-    }).finally(() => {
+        if (res.status) {
+          NotificationManager.error(res.message);
+        } else {
+          setParticipantAdded(true);
+          const vault = props.custodyContract.getVault();
+
+          vault.notifyNewParticipant((res) => {
+            console.log(
+              `App.js notifyNewParticipant custodyContract ${props.participant.email}`,
+              res
+            );
+            handleShow();
+          });
+        }
+      })
+      .catch((error) => {
+        console.log(
+          `App.js custodyContract.addParticipant error ${props.participant.email}`,
+          error
+        );
+      })
+      .finally(() => {
         setLoading(false);
-    })
-  }
+      });
+  };
 
-  const confirmParticipant = async () => {
+  useEffect(() => {
+    setError("");
+  }, [pin]);
+
+  const confirmParticipant = async (e) => {
+    e.preventDefault();
+    if (!pin) {
+      setError("Please enter pin");
+      return;
+    }
     setConfirmLoading(true);
-    props.custodyContractParticipant.confirmParticipant().then(res => {
-        console.log("App.js custodyContract.confirmParticipant", res);
-        if(res.status) {
+    props.custodyContractParticipant
+      .confirmParticipant(pin)
+      .then((res) => {
+        console.log(
+          `App.js custodyContractParticipant.confirmParticipant ${props.participant.email}`,
+          res
+        );
+        if (res.status) {
           NotificationManager.error(res.message);
         } else {
           handleClose();
         }
-      }).catch(error => {
-        console.log("App.js custodyContract.confirmParticipant error", error);
-      }).finally(() => {
+      })
+      .catch((error) => {
+        console.log(
+          `App.js custodyContract.confirmParticipant error ${props.participant.email}`,
+          error
+        );
+      })
+      .finally(() => {
         setConfirmLoading(false);
-    })
-  }
+      });
+  };
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
   return (
-      <div className='mb-2 mt-3 flex align-items-center'>
-        <Button disabled={loading || props.disabled} onClick={addParticipant}>Add Participant 2 {loading ? <Spinner animation="border" size="sm" /> : null}</Button> 
-        {props.participantAdded ? <span className='text-success'> Participant Added</span> : null}
-        <Modal show={show} onHide={() => {}}>
+    <div className="mb-2 mt-3 flex align-items-center">
+      <Button disabled={loading || props.disabled} onClick={addParticipant}>
+        Add Signer {props.isCreator ? "(Creator)" : props.index}{" "}
+        {loading ? <Spinner animation="border" size="sm" /> : null}
+      </Button>
+      {participantAdded ? (
+        <span className="text-success"> Participant Added</span>
+      ) : null}
+      <Modal size="lg" show={show} onHide={handleClose}>
         <Modal.Header closeButton>
-          <Modal.Title>Participant Confirmation</Modal.Title>
+          <Modal.Title>
+            Participant Confirmation ({props.participant.email})
+          </Modal.Title>
         </Modal.Header>
-        <Modal.Body>Confirm participant 2</Modal.Body>
-        <Modal.Footer>
-          <Button disabled={confirmLoading} variant="primary" onClick={confirmParticipant}>
-            Confirm {confirmLoading ? <Spinner animation="border" size="sm" /> : null}
-          </Button>
-        </Modal.Footer>
+        <Modal.Body>
+          Confirm Signer {props.isCreator ? "(Creator)" : props.index}
+          <Form onSubmit={confirmParticipant}>
+            <Form.Group className="my-3" controlId="exampleForm.ControlInput1">
+              <Form.Control
+                onChange={(e) => setPin(e.target.value)}
+                value={pin}
+                type="number"
+                placeholder="Enter PIN"
+                autoFocus
+              />
+            </Form.Group>
+            <span className="text-danger">{error}</span>
+            <div className="d-flex justify-content-end">
+              <Button
+                disabled={confirmLoading || !pin}
+                variant="primary"
+                onClick={confirmParticipant}
+              >
+                Confirm{" "}
+                {confirmLoading ? (
+                  <Spinner animation="border" size="sm" />
+                ) : null}
+              </Button>
+            </div>
+          </Form>
+        </Modal.Body>
       </Modal>
-      </div>
+    </div>
   );
 }
 
