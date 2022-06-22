@@ -13,7 +13,6 @@ function ParticipantConfirm2(props) {
         if(res.status) {
           NotificationManager.error(res.message);
         } else {
-          props.setParticipant2Confirmed(true);
         }
       }).catch(error => {
         console.log("App.js custodyContract.confirmParticipant error", error);

@@ -13,14 +13,18 @@ function AddParticipantCreator(props) {
     setLoading(true);
     props.custodyContract.addParticipant(configs.creatorEmail, props.shares[0]).then(res => {
       console.log("App.js custodyContract.addParticipant", res);
-      props.setParticipantAdded(true);
-      const vault = props.custodyContract.getVault();
 
-      vault.notifyNewParticipant((res) => {
-        const result = res.response.result;
-        console.log("App.js notifyNewParticipant custodyContract", res);
-        handleShow();
-      })
+      if(res.status) {
+        NotificationManager.error(res.message);
+      } else {
+        props.setParticipantAdded(true);
+        const vault = props.custodyContract.getVault();
+
+        vault.notifyNewParticipant((res) => {
+          console.log("App.js notifyNewParticipant custodyContract", res);
+          handleShow();
+        })
+      }
     }).catch(error => {
       console.log("App.js custodyContract.addParticipant error", error);
     }).finally(() => {
@@ -36,7 +40,6 @@ function AddParticipantCreator(props) {
           NotificationManager.error(res.message);
         } else {
           handleClose();
-          props.setParticipant1Confirmed(true);
         }
       }).catch(error => {
         console.log("App.js custodyContract.confirmParticipant error", error);

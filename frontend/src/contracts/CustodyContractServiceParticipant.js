@@ -21,7 +21,7 @@ class CustodyContractServiceParticipant {
   }
 
   confirmParticipant() {
-    return this.vault.confirmParticipant(configs.creatorEmail, configs.participantEmail, configs.participantPin);
+    return this.vault.confirmParticipant(configs.creatorEmail, configs.participantEmail, configs.participantPin, {from: this.userAddress});
   }
 
   signTransaction(_tx) {

@@ -35,13 +35,7 @@ class CustodyContractServiceCreator {
   }
 
   createVault() {
-    // const email = ethers.utils.formatBytes32String("creator@email.com");
-    // const id = ethers.utils.formatBytes32String("abc1234");
-    // console.log("CustodyContractServiceCreator", {
-    //   email,
-    //   id
-    // })
-    return this.vault.createVault(configs.creatorEmail, configs.creatorId);
+    return this.vault.createVault(configs.creatorEmail, configs.creatorId, {from: this.userAddress});
   }
 
   defineQuorum(_minParticipants) {
@@ -49,6 +43,8 @@ class CustodyContractServiceCreator {
   }
 
   addParticipant(_participant, share) {
+    console.log('CustodyContractServiceCreator addParticipant', {_participant, share});
+
     return this.vault.addParticipant(configs.creatorEmail, _participant, share, {from: this.userAddress});
   }
 

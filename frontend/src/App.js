@@ -8,16 +8,14 @@ import { Container } from "react-bootstrap";
 import CreateVault from "./buttons/createVault";
 import DefineQuorum from "./buttons/defineQuorum";
 import AddParticipantCreator from "./buttons/addParticipantCreator";
-import ParticipantConfirm1 from "./buttons/participantConfirm1";
-import ParticipantConfirm2 from "./buttons/participantConfirm2";
 import PromptSignatures from "./buttons/promptSignatures";
 import CustodyContractServiceParticipant from "./contracts/CustodyContractServiceParticipant";
 import CreateVaultParticipant from "./buttons/createVaultParticipant";
-import SignTransactionCreator from "./buttons/signTransactionCreator";
-import SignTransactionsignParticipant from "./buttons/signTransactionParticipant";
 import AddParticipant from "./buttons/addParticipant";
 import CheckQuorum from "./buttons/checkQuorum";
 import GetShards from "./buttons/getShards";
+
+const isDev = process.env.NODE_ENV === 'development';
 
 function App() {
   const [custodyContract, setCustodyContract] = useState();
@@ -30,8 +28,6 @@ function App() {
   const [quorumDefined, setQuorumDefined] = useState(false);
   const [participantAdded, setParticipantAdded] = useState(false);
   const [participantCreatorAdded, setParticipantCreatorAdded] = useState(false);
-  const [participant1Confirmed, setParticipant1Confirmed] = useState(false);
-  const [participant2Confirmed, setParticipant2Confirmed] = useState(false);
   const [promptSignaturesDone, setPromptSignaturesDone] = useState(false);
   const [checkQuorumDone, setCheckQuorumDone] = useState(false);
   const [addSignTransactionListener, setaddSignTransactionListener] = useState();
@@ -46,25 +42,8 @@ function App() {
   }, []);
 
   useEffect(() => {
-    // if (custodyContractParticipant) {
-    //   const vault = custodyContractParticipant.getVault();
-
-    //   vault.notifyNewParticipant((res) => {
-    //     const result = res.response.result;
-    //     console.log("App.js notifyNewParticipant custodyContractParticipant", res);
-    //   })
-    // }
-  }, [custodyContractParticipant]);
-
-  useEffect(() => {
     if (custodyContract) {
       createShards();
-      // const vault = custodyContract.getVault();
-
-      // vault.notifyNewParticipant((res) => {
-      //   const result = res.response.result;
-      //   console.log("App.js notifyNewParticipant custodyContract", res);
-      // })
     }
   }, [custodyContract]);
 
@@ -129,7 +108,6 @@ function App() {
               custodyContract={custodyContract}
               participantAdded={participantCreatorAdded}
               setParticipantAdded={setParticipantCreatorAdded}
-              setParticipant1Confirmed={setParticipant1Confirmed}
               disabled={!quorumDefined}
               shares={shares}
             />
@@ -138,14 +116,12 @@ function App() {
               custodyContractParticipant={custodyContractParticipant}
               participantAdded={participantAdded}
               setParticipantAdded={setParticipantAdded}
-              setParticipant2Confirmed={setParticipant2Confirmed}
               disabled={!quorumDefined}
               shares={shares}
             />
             {/* <ParticipantConfirm1
               custodyContract={custodyContract}
               participant1Confirmed={participant1Confirmed}
-              setParticipant1Confirmed={setParticipant1Confirmed}
               shares={shares}
               disabled={!participantAdded}
             /> */}
@@ -175,7 +151,7 @@ function App() {
               addSignTransactionListener={addSignTransactionListener}
               privateKey={wallet?.privateKey}
             />
-            {/*<GetShards
+            {/* <GetShards
               custodyContract={custodyContract}
               txid={txid}
               checkQuorumDone={checkQuorumDone}
@@ -194,7 +170,6 @@ function App() {
             {/* <ParticipantConfirm2
               custodyContract={custodyContractParticipant}
               participant2Confirmed={participant2Confirmed}
-              setParticipant2Confirmed={setParticipant2Confirmed}
               shares={shares}
               disabled={!participantCreatorAdded}
             /> */}
