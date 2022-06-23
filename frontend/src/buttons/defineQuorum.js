@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button, Spinner } from 'react-bootstrap';
 import { NotificationManager } from 'react-notifications';
-import CustodyContractServiceCreator from '../contracts/CustodyContractServiceCreator';
+import CustodyContractService from '../contracts/CustodyContractService';
 
 function DefineQuorum(props) {
     const [loading, setLoading] = useState(false);
@@ -9,7 +9,7 @@ function DefineQuorum(props) {
 
   const defineQuorum = async () => {
     setLoading(true);
-    const custodyContract = new CustodyContractServiceCreator(props.mnemonic, props.id);
+    const custodyContract = new CustodyContractService(props.mnemonic, props.id);
 
     custodyContract.defineQuorum(props.email, props.minimumSigners.toString()).then(res => {
         console.log("App.js custodyContract.defineQuorum", res);

@@ -51,7 +51,7 @@ function TotalSignersModal(props) {
         show={!props.totalSigners}
       >
         <Modal.Body>
-          <Form>
+          <Form onSubmit={save}>
             <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
               <Form.Label>How many signers do you want to create ?</Form.Label>
               <Form.Control

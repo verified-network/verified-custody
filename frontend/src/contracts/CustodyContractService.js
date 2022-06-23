@@ -1,5 +1,4 @@
 import { CustodyContract, Provider, VerifiedWallet } from '@verified-network/verified-sdk';
-const ethers = require("ethers");
 
 const mnemonicDefault = 'ozone chief cave farm damage sweet inhale display inch purity leader brick';
 export const API_KEY = '7465b99634184765843e4f232545788f';
@@ -14,12 +13,10 @@ export const configs = {
   network: 'goerli'
 }
 
-class CustodyContractServiceCreator {
+class CustodyContractService {
   constructor(mnemonic) {
     this.wallet = VerifiedWallet.importWallet(mnemonic || mnemonicDefault).setProvider(Provider.infuraProvider(configs.network, API_KEY));
     
-    console.log('CustodyContractServiceCreator constructor wallet', this.wallet);
-
     this.userAddress = this.wallet.address;
     this.creatorEmail = null;
     this.participantEmail = null;
@@ -29,7 +26,6 @@ class CustodyContractServiceCreator {
 
   getCreator() {
     this.vault.getCreator(configs.creatorEmail).then(res => {
-        console.log("getCreator", res)
     });
   }
 
@@ -54,17 +50,14 @@ class CustodyContractServiceCreator {
   }
 
   promptSignatures(_creator) {
-    console.log('CustodyContractServiceCreator defineQuorum',_creator, this.userAddress);
     return this.vault.promptSignatures(_creator);
   }
 
   signTransaction(_creator, _participant, _tx, _pin) {
-    console.log('CustodyContractServiceCreator signTransaction',_creator, _participant, _tx, _pin);
     return this.vault.signTransaction(_creator, _participant, _tx, _pin);
   }
 
   checkQuorum(_creator, _participant, _txid) {
-    console.log('CustodyContractServiceCreator checkQuorum', _creator, _participant, _txid, this.participantEmail);
     return this.vault.checkQuorum(_creator, _participant, _txid);
   }
 
@@ -77,4 +70,4 @@ class CustodyContractServiceCreator {
   };
 }
 
-export default CustodyContractServiceCreator;
+export default CustodyContractService;

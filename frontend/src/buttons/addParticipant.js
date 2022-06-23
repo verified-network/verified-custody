@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Button, Spinner, Modal, Form } from "react-bootstrap";
 import { NotificationManager } from "react-notifications";
-import CustodyContractServiceCreator from "../contracts/CustodyContractServiceCreator";
+import CustodyContractService from "../contracts/CustodyContractService";
 
 function AddParticipant(props) {
   const [loading, setLoading] = useState(false);
@@ -14,7 +14,7 @@ function AddParticipant(props) {
 
   const addParticipant = async () => {
     setLoading(true);
-    const custodyContract = new CustodyContractServiceCreator(props.creator.mnemonic);
+    const custodyContract = new CustodyContractService(props.creator.mnemonic);
 
     custodyContract
       .addParticipant(props.creator.email, props.participant.email, props.share)
@@ -22,6 +22,7 @@ function AddParticipant(props) {
         console.log("App.js custodyContract.addParticipant", res);
 
         if (res.status) {
+          setLoading(false);
           NotificationManager.error(res.message);
         } else {
           setParticipantAdded(true);
@@ -32,6 +33,7 @@ function AddParticipant(props) {
               `App.js notifyNewParticipant custodyContract ${props.participant.email}`,
               res
             );
+            setLoading(false);
             handleShow();
           });
         }
@@ -41,8 +43,6 @@ function AddParticipant(props) {
           `App.js custodyContract.addParticipant error ${props.participant.email}`,
           error
         );
-      })
-      .finally(() => {
         setLoading(false);
       });
   };
@@ -58,7 +58,7 @@ function AddParticipant(props) {
       return;
     }
     setConfirmLoading(true);
-    const custodyContractParticipant = new CustodyContractServiceCreator(props.participant.mnemonic);
+    const custodyContractParticipant = new CustodyContractService(props.participant.mnemonic);
 
     custodyContractParticipant
       .confirmParticipant(props.creator.email, props.participant.email, pin)
@@ -111,6 +111,7 @@ function AddParticipant(props) {
           Confirm {props.isCreator ? "Signer" : `Co-Signer ${props.index}`}
           <Form onSubmit={confirmParticipant}>
             <Form.Group className="my-3" controlId="exampleForm.ControlInput1">
+            <Form.Label htmlFor="disabledTextInput">Enter PIN</Form.Label>
               <Form.Control
                 onChange={(e) => setPin(e.target.value)}
                 value={pin}

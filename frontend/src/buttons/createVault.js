@@ -1,30 +1,55 @@
 import React, { useState } from 'react';
 import { Button, Spinner, InputGroup, Form } from 'react-bootstrap';
 import { NotificationManager } from 'react-notifications';
-import CustodyContractServiceCreator from '../contracts/CustodyContractServiceCreator';
+import CustodyContractService from '../contracts/CustodyContractService';
 
 function CreateVault(props) {
     const [loading, setLoading] = useState(false);
     const [vaultCreated, setVaultCreated] = useState(false);
-    const [email, setEmail] = useState(props.defaultEmail || '');
+    const [email, setEmail] = useState(props.email || props.defaultEmail || '');
 
   const createVault = async (e) => {
     e.preventDefault();
     if(!email) return;
     setLoading(true);
-    const custodyContract = new CustodyContractServiceCreator(props.mnemonic);
+    const custodyContract = new CustodyContractService(props.mnemonic);
       custodyContract.createVault(email, props.id).then(res => {
       if(res.status) {
         NotificationManager.error(res.message);
+        setLoading(false);
       } else {
-        setVaultCreated(true);
-        props.onEmailChange(email);
+        if(props.isCreator) {
+          defineQuorum();
+        } else {
+          setVaultCreated(true);
+          props.onEmailChange(email);
+          setLoading(false);
+        }
         console.log('CreateVault contract', props.contract);
       }
-      console.log(`App.js custodyContract.createVault ${props.email}`, res);
+      console.log(`App.js custodyContract.createVault ${email}`, res);
     }).catch(error => {
-      console.log(`App.js custodyContract.createVault ${props.email} error`, error);
-    }).finally(() => {
+      setLoading(false);
+      console.log(`App.js custodyContract.createVault ${email} error`, error);
+    });
+  }
+
+  const defineQuorum = async () => {
+    setLoading(true);
+    const custodyContract = new CustodyContractService(props.mnemonic, props.id);
+
+    custodyContract.defineQuorum(email, props.minimumSigners.toString()).then(res => {
+        console.log("App.js custodyContract.defineQuorum", res);
+        if(res.status) {
+          NotificationManager.error(res.message);
+        } else {
+          props.setQuorumDefined(true);
+          setVaultCreated(true);
+          props.onEmailChange(email);
+        }
+      }).catch(error => {
+        console.log("App.js custodyContract.defineQuorum error", error);
+      }).finally(() => {
         setLoading(false);
     })
   }

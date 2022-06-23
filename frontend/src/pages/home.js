@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import CustodyContractServiceCreator from "../contracts/CustodyContractServiceCreator";
+import CustodyContractService from "../contracts/CustodyContractService";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Spinner } from "react-bootstrap";
 import CreateVault from "../buttons/createVault";
@@ -46,11 +46,10 @@ function HomePage() {
       minimumSigners
     );
     setShares(shares);
-    console.log("PrivateKey", shares);
   };
 
   const getContract = (data) => {
-    return new CustodyContractServiceCreator(data.mnemonic, data.id);
+    return new CustodyContractService(data.mnemonic, data.id);
   };
 
   const onChangeTotalSigners = (value, minimumSigners) => {
@@ -63,10 +62,11 @@ function HomePage() {
           mnemonic: signersMnemonics[s],
           // email: !i ? "creator@email.com" : `signer${s}@email.com`,
           id: `id_${i}`,
-          pin: `123${i}`,
+        //   pin: `123${i}`,
         };
         item.contract = getContract(item);
         if (isDev) {
+            item.pin = `123${i}`;
           item.defaultEmail = !i
             ? "signer@email.com"
             : `cosigner${s}@email.com`;
@@ -85,11 +85,13 @@ function HomePage() {
     signerItem.email = email;
     newSigners[index.toString()] = signerItem;
     setSigners(newSigners);
-    console.log("App.js onEmailChange", { email, index, newSigners });
   };
 
-  const onParticipantAdded = (email) => {
-    const newSigners = { ...signers };
+  const onParticipantAdded = (index) => {
+    const newSigners = { ...signers};
+    const signerItem = newSigners[index.toString()];
+    signerItem.isAdded = true;
+    newSigners[index.toString()] = signerItem;
     const creator = newSigners["0"];
     creator.participants = (creator.participants || 0) + 1;
     newSigners["0"] = creator;
@@ -116,8 +118,6 @@ function HomePage() {
     );
   }
 
-  console.log("App.js Render", { totalSigners, signers, shares, privateKey });
-
   return (
     <>
       <div>
@@ -139,7 +139,7 @@ function HomePage() {
         {shares.map((share, index) => {
           return (
             <div key={share} className="mb-1">
-              <b>Share {index}</b> - {share}
+              <b>Shard {index}</b> - {share}
             </div>
           );
         })}
@@ -175,17 +175,20 @@ function HomePage() {
               <div className="d-flex flex-column px-4">
                 <CreateVault
                   onEmailChange={(email) => onEmailChange(email, index)}
+                  minimumSigners={minimumSigners}
+                    setQuorumDefined={setQuorumDefined}
+                    isCreator={isCreator}
                   {...item}
                 />
                 {isCreator ? (
                   <>
-                    <DefineQuorum
+                    {/* <DefineQuorum
                       minimumSigners={minimumSigners}
                       creatorEmail={creator.email}
                       setQuorumDefined={setQuorumDefined}
                       quorumDefined={quorumDefined}
                       {...item}
-                    />
+                    /> */}
                     {quorumDefined
                       ? signersArray.map((participant, i) => {
                           if (!participant.email) return false;
@@ -197,7 +200,7 @@ function HomePage() {
                               index={i}
                               share={shares[i]}
                               isCreator={!i}
-                              onParticipantAdded={onParticipantAdded}
+                              onParticipantAdded={() => onParticipantAdded(i)}
                               minimumSigners={minimumSigners}
                             />
                           );

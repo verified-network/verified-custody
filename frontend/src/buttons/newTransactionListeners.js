@@ -13,9 +13,9 @@ function NewTransactionListeners(props) {
 
     vault.notifyNewTransaction((res) => {
       const result = res.response.result;
+      console.log(`App.js notifyNewTransaction ${props.email}`, res);
       props.setTxid(result[2]);
       handleShow();
-      console.log(`App.js notifyNewTransaction ${props.email}`, res);
     });
   }, []);
 
@@ -70,6 +70,7 @@ function NewTransactionListeners(props) {
         {props.isCreator ? "Signer" : `Co-Signer ${props.index}`} Transaction Sign
         <Form onSubmit={signTransaction}>
           <Form.Group className="my-3" controlId="exampleForm.ControlInput1">
+            <Form.Label htmlFor="disabledTextInput">Enter PIN</Form.Label>
             <Form.Control
               onChange={(e) => setPin(e.target.value)}
               value={pin}
@@ -85,7 +86,7 @@ function NewTransactionListeners(props) {
               variant="primary"
               onClick={signTransaction}
             >
-              Sign Transaction Signer{" "}
+              Sign Transaction {" "}
               {loading ? <Spinner animation="border" size="sm" /> : null}
             </Button>
           </div>

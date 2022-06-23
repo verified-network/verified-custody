@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Button, Spinner } from "react-bootstrap";
 import { NotificationManager } from "react-notifications";
-import CustodyContractServiceCreator from "../contracts/CustodyContractServiceCreator";
+import CustodyContractService from "../contracts/CustodyContractService";
 import NewTransactionListeners from "./newTransactionListeners";
 import SignTransactionListener from "./signTransactionListener";
 
@@ -17,15 +17,12 @@ function PromptSignatures(props) {
   const [txid, setTxid] = useState("");
 
   useEffect(() => {
-    console.log("PromptSignatures useEffect", {minimumSigners: props.minimumSigners, signedCount})
     if (signedCount >= props.minimumSigners) {
       setAddSignTransactionListener(true);
     }
   }, [signedCount]);
 
   useEffect(() => {
-    console.log("PromptSignatures transactionSigned", {transactionSigned})
-
     if (transactionSigned) {
       setSignedCount(signedCount + 1);
     }
@@ -33,7 +30,7 @@ function PromptSignatures(props) {
 
   const promptSignatures = async () => {
     setLoading(true);
-    const custodyContract = new CustodyContractServiceCreator(props.mnemonic);
+    const custodyContract = new CustodyContractService(props.mnemonic);
 
     custodyContract
       .promptSignatures(props.email)
@@ -62,22 +59,23 @@ function PromptSignatures(props) {
 
   return (
     <div className="mb-2 mt-3 flex align-items-center">
-      <Button disabled={loading || props.disabled} onClick={promptSignatures}>
+      <Button disabled={loading || promptSignaturesDone} onClick={promptSignatures}>
         Sign transaction{" "}
         {loading ? <Spinner animation="border" size="sm" /> : null}
       </Button>
       {promptSignaturesDone ? (
         <>
           <span className="text-success"> Requested, </span>
-          <span className="text-success">Signed By {signedCount} (<b>Required: {props.minimumSigners}</b> )</span>
+          <span className="text-success">Signed By {signedCount} (<b>Required: {props.minimumSigners}</b>)</span>
         </>
       ) : null}
 
       {addNewTransactionListeners
         ? props.signersArray.map((item, index) => {
+            if(!item.isAdded) return false;
             const isCreator = !index;
             const creator = props.signersArray[0];
-            const custodyContract = new CustodyContractServiceCreator(
+            const custodyContract = new CustodyContractService(
               item.mnemonic
             );
 

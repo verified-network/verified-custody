@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Spinner, Modal } from "react-bootstrap";
 import { NotificationManager } from "react-notifications";
-import CustodyContractServiceCreator from "../contracts/CustodyContractServiceCreator";
+import CustodyContractService from "../contracts/CustodyContractService";
 
 function SignTransactionListener(props) {
   const [loadingCheckQuorum, setLoadingCheckQuorum] = useState(false);
@@ -12,7 +12,7 @@ function SignTransactionListener(props) {
 
   useEffect(() => {
     console.log("App.js notifySignTransaction CheckQuorum");
-    const custodyContract = new CustodyContractServiceCreator(props.mnemonic);
+    const custodyContract = new CustodyContractService(props.mnemonic);
     const vaultCreator = custodyContract.getVault();
 
     vaultCreator.notifySignTransaction((res) => {
@@ -96,7 +96,7 @@ function SignTransactionListener(props) {
           )}
           <br />
           <b>Private Key by Shards:</b>{" "}
-          {loadingGetShards ? <Spinner animation="border" size="sm" /> : shards}
+          {loadingGetShards ? <Spinner animation="border" size="sm" /> : `0x${shards}`}
         </Modal.Body>
       </Modal>
     </div>
