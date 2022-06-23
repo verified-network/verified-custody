@@ -62,12 +62,12 @@ function NewTransactionListeners(props) {
     <Modal show={show} onHide={() => {}}>
       <Modal.Header closeButton>
         <Modal.Title>
-          {props.isCreator ? "Creator" : "Signer"} Transaction Sign (
+          {props.isCreator ? "Signer" : "Co-Signer"} Transaction Sign (
           {props.email})
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        {props.isCreator ? "Creator" : `Signer ${props.index}`} Transaction Sign
+        {props.isCreator ? "Signer" : `Co-Signer ${props.index}`} Transaction Sign
         <Form onSubmit={signTransaction}>
           <Form.Group className="my-3" controlId="exampleForm.ControlInput1">
             <Form.Control
@@ -85,7 +85,7 @@ function NewTransactionListeners(props) {
               variant="primary"
               onClick={signTransaction}
             >
-              Sign Transaction Creator{" "}
+              Sign Transaction Signer{" "}
               {loading ? <Spinner animation="border" size="sm" /> : null}
             </Button>
           </div>

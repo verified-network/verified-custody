@@ -57,7 +57,7 @@ function AddParticipantCreator(props) {
         {props.participantAdded ? <span className='text-success'> Participant Added</span> : null}
         <Modal show={show} onHide={() => {}}>
         <Modal.Header closeButton>
-          <Modal.Title>Creator Confirmation</Modal.Title>
+          <Modal.Title>Signer Confirmation</Modal.Title>
         </Modal.Header>
         <Modal.Body>Confirm participant 1</Modal.Body>
         <Modal.Footer>

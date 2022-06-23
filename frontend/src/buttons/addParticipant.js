@@ -84,7 +84,7 @@ function AddParticipant(props) {
   return (
     <div className="mb-2 mt-3 flex align-items-center">
       <Button disabled={loading || props.disabled} onClick={addParticipant}>
-        Add Signer {props.isCreator ? "(Creator)" : props.index}{" "}
+        Add {props.isCreator ? "(Signer)" : `Co-Signer ${props.index}`}{" "}
         {loading ? <Spinner animation="border" size="sm" /> : null}
       </Button>
       {participantAdded ? (
@@ -97,7 +97,7 @@ function AddParticipant(props) {
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          Confirm Signer {props.isCreator ? "(Creator)" : props.index}
+          Confirm {props.isCreator ? "(Signer)" : `Co-Signer ${props.index}`}
           <Form onSubmit={confirmParticipant}>
             <Form.Group className="my-3" controlId="exampleForm.ControlInput1">
               <Form.Control
