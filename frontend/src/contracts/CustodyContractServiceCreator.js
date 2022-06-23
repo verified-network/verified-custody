@@ -15,15 +15,15 @@ export const configs = {
 }
 
 class CustodyContractServiceCreator {
-  constructor(mnemonic, creatorEmail, participantEmail, id) {
+  constructor(mnemonic) {
     this.wallet = VerifiedWallet.importWallet(mnemonic || mnemonicDefault).setProvider(Provider.infuraProvider(configs.network, API_KEY));
     
     console.log('CustodyContractServiceCreator constructor wallet', this.wallet);
 
     this.userAddress = this.wallet.address;
-    this.creatorEmail = creatorEmail;
-    this.participantEmail = participantEmail;
-    this.id = id;
+    this.creatorEmail = null;
+    this.participantEmail = null;
+    this.id = null;
     this.vault = new CustodyContract(this.wallet);
   }
 
@@ -37,39 +37,39 @@ class CustodyContractServiceCreator {
     return this.vault;
   }
 
-  createVault() {
-    return this.vault.createVault(this.participantEmail, this.id);
+  createVault(_email, _id) {
+    return this.vault.createVault(_email, _id);
   }
 
-  defineQuorum(_minParticipants) {
-    return this.vault.defineQuorum(this.creatorEmail, _minParticipants);
+  defineQuorum(_creator, _minParticipants) {
+    return this.vault.defineQuorum(_creator, _minParticipants);
   }
 
-  addParticipant(_participant, share) {
-    return this.vault.addParticipant(this.creatorEmail, _participant, share);
+  addParticipant(_creator, _participant, _share) {
+    return this.vault.addParticipant(_creator, _participant, _share);
   }
 
-  confirmParticipant(_pin) {
-    return this.vault.confirmParticipant(this.creatorEmail, this.participantEmail, _pin);
+  confirmParticipant(_creator, _participant, _pin) {
+    return this.vault.confirmParticipant(_creator, _participant, _pin);
   }
 
-  promptSignatures() {
-    console.log('CustodyContractServiceCreator defineQuorum',this.creatorEmail, this.participantEmail, this.userAddress);
-    return this.vault.promptSignatures(this.creatorEmail);
+  promptSignatures(_creator) {
+    console.log('CustodyContractServiceCreator defineQuorum',_creator, this.userAddress);
+    return this.vault.promptSignatures(_creator);
   }
 
-  signTransaction(_participant, _tx, _pin) {
-    console.log('CustodyContractServiceCreator signTransaction',this.creatorEmail, _participant, _tx, _pin);
-    return this.vault.signTransaction(this.creatorEmail, _participant, _tx, _pin);
+  signTransaction(_creator, _participant, _tx, _pin) {
+    console.log('CustodyContractServiceCreator signTransaction',_creator, _participant, _tx, _pin);
+    return this.vault.signTransaction(_creator, _participant, _tx, _pin);
   }
 
-  checkQuorum(_txid) {
-    console.log('CustodyContractServiceCreator signTransaction',this.creatorEmail, this.participantEmail);
-    return this.vault.checkQuorum(this.creatorEmail, this.participantEmail, _txid);
+  checkQuorum(_creator, _participant, _txid) {
+    console.log('CustodyContractServiceCreator checkQuorum', _creator, _participant, _txid, this.participantEmail);
+    return this.vault.checkQuorum(_creator, _participant, _txid);
   }
 
-  getShards(_txid) {
-    return this.vault.getShards(this.creatorEmail, _txid);
+  getShards(_creator, _txid) {
+    return this.vault.getShards(_creator, _txid);
   }
 
   getWallet = () => {

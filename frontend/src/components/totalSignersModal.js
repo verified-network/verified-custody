@@ -78,7 +78,7 @@ function TotalSignersModal(props) {
         </Modal.Body>
         <Modal.Footer>
           <Button variant="primary" onClick={save}>
-            Save
+            Next
           </Button>
         </Modal.Footer>
       </Modal>

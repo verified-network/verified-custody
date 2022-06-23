@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Spinner, Modal } from "react-bootstrap";
 import { NotificationManager } from "react-notifications";
+import CustodyContractServiceCreator from "../contracts/CustodyContractServiceCreator";
 
 function SignTransactionListener(props) {
   const [loadingCheckQuorum, setLoadingCheckQuorum] = useState(false);
@@ -11,19 +12,19 @@ function SignTransactionListener(props) {
 
   useEffect(() => {
     console.log("App.js notifySignTransaction CheckQuorum");
-
-    const vaultCreator = props.custodyContract.getVault();
+    const custodyContract = new CustodyContractServiceCreator(props.mnemonic);
+    const vaultCreator = custodyContract.getVault();
 
     vaultCreator.notifySignTransaction((res) => {
-      checkQuorum();
+      checkQuorum(custodyContract);
       console.log("App.js notifySignTransaction vaultCreator", res);
     });
   }, [props.signedCount]);
 
-  const checkQuorum = async () => {
+  const checkQuorum = async (custodyContract) => {
     setLoadingCheckQuorum(true);
-    props.custodyContract
-      .checkQuorum(props.txid)
+    custodyContract
+      .checkQuorum(props.email, props.email, props.txid)
       .then((res) => {
         if (res.status) {
           // NotificationManager.error(res.message);
@@ -32,7 +33,7 @@ function SignTransactionListener(props) {
           const result = res.response.result;
           setCheckQuorumDone(result[0]);
           handleShow();
-          getShards();
+          getShards(custodyContract);
         }
         console.log("App.js custodyContract.checkQuorum", res);
       })
@@ -44,10 +45,10 @@ function SignTransactionListener(props) {
       });
   };
 
-  const getShards = async () => {
+  const getShards = async (custodyContract) => {
     setLoadingGetShards(true);
-    props.custodyContract
-      .getShards(props.txid)
+    custodyContract
+      .getShards(props.email, props.txid)
       .then((res) => {
         if (res.status) {
           NotificationManager.error(res.message);

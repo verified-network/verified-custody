@@ -33,8 +33,10 @@ function PromptSignatures(props) {
 
   const promptSignatures = async () => {
     setLoading(true);
-    props.custodyContract
-      .promptSignatures()
+    const custodyContract = new CustodyContractServiceCreator(props.mnemonic);
+
+    custodyContract
+      .promptSignatures(props.email)
       .then((res) => {
         if (res.status) {
           NotificationManager.error(res.message);
@@ -61,11 +63,14 @@ function PromptSignatures(props) {
   return (
     <div className="mb-2 mt-3 flex align-items-center">
       <Button disabled={loading || props.disabled} onClick={promptSignatures}>
-        Prompt Signatures{" "}
+        Sign transaction{" "}
         {loading ? <Spinner animation="border" size="sm" /> : null}
       </Button>
       {promptSignaturesDone ? (
-        <span className="text-success"> Done</span>
+        <>
+          <span className="text-success"> Requested, </span>
+          <span className="text-success">Signed By {signedCount} (<b>Required: {props.minimumSigners}</b> )</span>
+        </>
       ) : null}
 
       {addNewTransactionListeners
@@ -73,10 +78,7 @@ function PromptSignatures(props) {
             const isCreator = !index;
             const creator = props.signersArray[0];
             const custodyContract = new CustodyContractServiceCreator(
-              item.mnemonic,
-              creator.email,
-              item.email,
-              item.id
+              item.mnemonic
             );
 
             return (
@@ -87,6 +89,7 @@ function PromptSignatures(props) {
                 isCreator={isCreator}
                 onTransactionSigned={onTransactionSigned}
                 index={index}
+                creator={creator}
                 {...item}
               />
             );

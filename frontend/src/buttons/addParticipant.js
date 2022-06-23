@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Button, Spinner, Modal, Form } from "react-bootstrap";
 import { NotificationManager } from "react-notifications";
+import CustodyContractServiceCreator from "../contracts/CustodyContractServiceCreator";
 
 function AddParticipant(props) {
   const [loading, setLoading] = useState(false);
@@ -9,11 +10,14 @@ function AddParticipant(props) {
   const [participantAdded, setParticipantAdded] = useState(false);
   const [pin, setPin] = useState(props.participant.pin);
   const [error, setError] = useState("");
+  const [confirmed, setConfirmed] = useState(false);
 
   const addParticipant = async () => {
     setLoading(true);
-    props.custodyContract
-      .addParticipant(props.participant.email, props.share)
+    const custodyContract = new CustodyContractServiceCreator(props.creator.mnemonic);
+
+    custodyContract
+      .addParticipant(props.creator.email, props.participant.email, props.share)
       .then((res) => {
         console.log("App.js custodyContract.addParticipant", res);
 
@@ -21,7 +25,7 @@ function AddParticipant(props) {
           NotificationManager.error(res.message);
         } else {
           setParticipantAdded(true);
-          const vault = props.custodyContract.getVault();
+          const vault = custodyContract.getVault();
 
           vault.notifyNewParticipant((res) => {
             console.log(
@@ -54,8 +58,10 @@ function AddParticipant(props) {
       return;
     }
     setConfirmLoading(true);
-    props.custodyContractParticipant
-      .confirmParticipant(pin)
+    const custodyContractParticipant = new CustodyContractServiceCreator(props.participant.mnemonic);
+
+    custodyContractParticipant
+      .confirmParticipant(props.creator.email, props.participant.email, pin)
       .then((res) => {
         console.log(
           `App.js custodyContractParticipant.confirmParticipant ${props.participant.email}`,
@@ -64,6 +70,8 @@ function AddParticipant(props) {
         if (res.status) {
           NotificationManager.error(res.message);
         } else {
+          props.onParticipantAdded();
+          setConfirmed(true);
           handleClose();
         }
       })
@@ -83,21 +91,24 @@ function AddParticipant(props) {
 
   return (
     <div className="mb-2 mt-3 flex align-items-center">
-      <Button disabled={loading || props.disabled} onClick={addParticipant}>
-        Add {props.isCreator ? "(Signer)" : `Co-Signer ${props.index}`}{" "}
+      <Button disabled={loading || participantAdded} onClick={addParticipant}>
+        Add {props.isCreator ? "Signer" : `Co-Signer ${props.index}`}{" "}
         {loading ? <Spinner animation="border" size="sm" /> : null}
       </Button>
       {participantAdded ? (
-        <span className="text-success"> Participant Added</span>
+        <>
+          <span className="text-success"> Added, </span>
+          {!confirmed ? <span className="text-danger"> Not Confirmed</span> : <span className="text-success"> Confirmed</span>}
+        </>
       ) : null}
-      <Modal size="lg" show={show} onHide={handleClose}>
+      <Modal size="lg" show={show} onHide={() => {}}>
         <Modal.Header closeButton>
           <Modal.Title>
             Participant Confirmation ({props.participant.email})
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          Confirm {props.isCreator ? "(Signer)" : `Co-Signer ${props.index}`}
+          Confirm {props.isCreator ? "Signer" : `Co-Signer ${props.index}`}
           <Form onSubmit={confirmParticipant}>
             <Form.Group className="my-3" controlId="exampleForm.ControlInput1">
               <Form.Control

@@ -31,7 +31,7 @@ function NewTransactionListeners(props) {
     }
     setLoading(true);
     props.custodyContract
-      .signTransaction(props.email, props.txid, pin)
+      .signTransaction(props.creator.email, props.email, props.txid, pin)
       .then((res) => {
         if (res.status) {
           NotificationManager.error(res.message);
@@ -59,7 +59,7 @@ function NewTransactionListeners(props) {
   const handleShow = () => setShow(true);
 
   return (
-    <Modal show={show} onHide={() => {}}>
+    <Modal size="lg" show={show} onHide={() => {}}>
       <Modal.Header closeButton>
         <Modal.Title>
           {props.isCreator ? "Signer" : "Co-Signer"} Transaction Sign (
