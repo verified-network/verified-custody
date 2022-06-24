@@ -1,67 +1,64 @@
-import { CustodyContract } from '@verified-network/verified-sdk';
-import ContractService, { API_KEY } from './ContractService';
-// import VaultJson from '@verified-network/verified-sdk/dist/abi/custody/Vault.json'
-// import { createAlchemyWeb3 } from "@alch/alchemy-web3";
+import { CustodyContract, Provider, VerifiedWallet } from '@verified-network/verified-sdk';
+import { ethers } from 'ethers';
 
-// const web3 = createAlchemyWeb3(`wss://eth-rinkeby.alchemyapi.io/v2/${API_KEY}`);
+export const network = 'goerli';
 
-class CustodyContractService extends ContractService {
-  constructor() {
-    super();
-    console.log('CustodyContractService constructor wallet', this.getWallet());
-
-    this.userAddress = this.getWallet().address;
-    this.vault = new CustodyContract(this.getWallet());
-    console.log('CustodyContractService constructor', this.userAddress, this.vault);
-    this.creator = 'sainikrishan1999@gmail.com';
-    this.id = 'abc1234';
-    this.pin = '1234';
+class CustodyContractService {
+  constructor(mnemonic) {
+    this.wallet = VerifiedWallet.importWallet(mnemonic).setProvider(Provider.infuraProvider(network, process.env.REACT_APP_API_KEY));
+    
+    this.userAddress = this.wallet.address;
+    this.creatorEmail = null;
+    this.participantEmail = null;
+    this.id = null;
+    this.vault = new CustodyContract(this.wallet);
   }
 
-  getCreator() {
-    this.vault.getCreator(this.creator).then(res => {
-        console.log("getCreator", res)
-    });
+  async getBalance() {
+    const balance = await this.wallet.getBalance();
+    const balanceEth = ethers.utils.formatEther(balance);
+    return Number(balanceEth).toFixed(4);
   }
 
   getVault() {
     return this.vault;
   }
 
-  createVault() {
-    return this.vault.createVault(this.creator, this.id);
+  createVault(_email, _id) {
+    return this.vault.createVault(_email, _id);
   }
 
-  defineQuorum(_minParticipants) {
-    return this.vault.defineQuorum(this.creator, this.id, _minParticipants);
+  defineQuorum(_creator, _minParticipants) {
+    return this.vault.defineQuorum(_creator, _minParticipants);
   }
 
-  addParticipant(_participant) {
-    return this.vault.addParticipant(this.creator, this.id, _participant);
+  addParticipant(_creator, _participant, _share) {
+    return this.vault.addParticipant(_creator, _participant, _share);
   }
 
-  confirmParticipant(_participant, _id, _shard, _pin) {
-    const participant = _participant || this.creator;
-    const pin = _pin || this.pin;
-    const id = _id || this.id;
-    return this.vault.confirmParticipant(this.creator, participant, id, _shard, pin);
+  confirmParticipant(_creator, _participant, _pin) {
+    return this.vault.confirmParticipant(_creator, _participant, _pin);
   }
 
-  promptSignatures() {
-    return this.vault.promptSignatures(this.creator, this.id);
+  promptSignatures(_creator) {
+    return this.vault.promptSignatures(_creator);
   }
 
-  signTransaction(_participant, _tx, _pin) {
-    return this.vault.signTransaction(this.creator, _participant, this.id, _tx, _pin);
+  signTransaction(_creator, _participant, _tx, _pin) {
+    return this.vault.signTransaction(_creator, _participant, _tx, _pin);
   }
 
-  checkQuorum(_participant, _txid) {
-    return this.vault.checkQuorum(this.creator, this.id, _participant, _txid);
+  checkQuorum(_creator, _participant, _txid) {
+    return this.vault.checkQuorum(_creator, _participant, _txid);
   }
 
-  getShards(_txid) {
-    return this.vault.getShards(this.creator, this.id, _txid);
+  getShards(_creator, _txid) {
+    return this.vault.getShards(_creator, _txid);
   }
+
+  getWallet = () => {
+    return this.wallet;
+  };
 }
 
 export default CustodyContractService;
