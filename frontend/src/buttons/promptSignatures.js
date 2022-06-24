@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Button, Spinner } from "react-bootstrap";
 import { NotificationManager } from "react-notifications";
+import { useAppData } from "../contexts/appData";
 import CustodyContractService from "../contracts/CustodyContractService";
+import { isBalanceLow } from "../utils";
 import NewTransactionListeners from "./newTransactionListeners";
 import SignTransactionListener from "./signTransactionListener";
 
@@ -16,6 +18,10 @@ function PromptSignatures(props) {
   const [transactionSigned, setTransactionSigned] = useState(false);
   const [txid, setTxid] = useState("");
 
+  const {walletBalances, showInsufficientFundModal} = useAppData();
+
+  const balance = walletBalances[props.index];
+
   useEffect(() => {
     if (signedCount >= props.minimumSigners) {
       setAddSignTransactionListener(true);
@@ -29,6 +35,10 @@ function PromptSignatures(props) {
   }, [transactionSigned]);
 
   const promptSignatures = async () => {
+    if(isBalanceLow(balance)) {
+      showInsufficientFundModal(props.index)
+      return;
+    }
     setLoading(true);
     const custodyContract = new CustodyContractService(props.mnemonic);
 

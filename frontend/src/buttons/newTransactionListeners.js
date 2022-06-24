@@ -1,12 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { Button, Spinner, Modal, Form } from "react-bootstrap";
 import { NotificationManager } from "react-notifications";
+import { useAppData } from "../contexts/appData";
+import { isBalanceLow } from "../utils";
 
 function NewTransactionListeners(props) {
   const [loading, setLoading] = useState(false);
   const [show, setShow] = useState(false);
   const [pin, setPin] = useState(props.pin);
   const [error, setError] = useState("");
+
+  const {walletBalances, showInsufficientFundModal} = useAppData();
+
+  const balance = walletBalances[props.index];
 
   useEffect(() => {
     const vault = props.custodyContract.getVault();
@@ -27,6 +33,10 @@ function NewTransactionListeners(props) {
     e.preventDefault();
     if (!pin) {
       setError("Please enter pin");
+      return;
+    }
+    if(isBalanceLow(balance)) {
+      showInsufficientFundModal(props.index)
       return;
     }
     setLoading(true);

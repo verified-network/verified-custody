@@ -7,29 +7,27 @@ import PromptSignatures from "../buttons/promptSignatures";
 import AddParticipant from "../buttons/addParticipant";
 import TotalSignersModal from "../components/totalSignersModal";
 import { isDev } from "../App";
+import WalletInfo from "../components/walletInfo";
+import { useAppData } from "../contexts/appData";
 const ethers = require("ethers");
 
-const signersMnemonics = {
-  0: "ozone chief cave farm damage sweet inhale display inch purity leader brick", // 0x6d1965B856fc6ca7d322178b4554374DE76472A6
-  1: "recycle unaware fruit danger poverty card tag river protect sock asset fabric", // 0x8e83c3c8EabC4dfCcc590A6c3C661BAC2a2fbf52
-  2: "distance crisp session broom rail valley abuse eternal gorilla ghost record someone", // 0x1AF711dF8b66Da986095A646Ceeb72EbA715CAd2
-  3: "dinosaur asset primary face network obvious inhale final benefit major pottery tree", // 0x8226bbAEb1B8818977e93928599aa3A3ff31a442
-  4: "marriage swift hobby kitchen tip gasp exist path hundred vanish describe renew", // 0x019f2D77e4a8CA568fC8B2AB17f3C5a6aD18214c
-};
+const signersMnemonics = JSON.parse(process.env.REACT_APP_MNEMONICS);
 
 function HomePage() {
   const [totalSigners, setTotalSigners] = useState();
-  const [signers, setSigners] = useState({});
   const [minimumSigners, setMinimumSigners] = useState();
   const [privateKey, setPrivateKey] = useState();
   const [shares, setShares] = useState([]);
   const [quorumDefined, setQuorumDefined] = useState(false);
+
+  const {signers, setSigners, loadingBalances} = useAppData();
 
   const signersArray = Object.values(signers);
 
   useEffect(() => {
     let randomWallet = ethers.Wallet.createRandom();
     setPrivateKey(randomWallet.privateKey);
+    console.log('Json', JSON.parse(process.env.REACT_APP_MNEMONICS))
   }, []);
 
   useEffect(() => {
@@ -106,7 +104,7 @@ function HomePage() {
     );
   }
 
-  if (!shares.length || !privateKey || !signersArray.length || !totalSigners) {
+  if (!shares.length || !privateKey || !signersArray.length || !totalSigners || loadingBalances) {
     return (
       <div
         style={{ height: "100vh" }}
@@ -171,23 +169,18 @@ function HomePage() {
                   </h4>
                 </div>
               </div>
+              <WalletInfo {...item} index={index} />
               <div className="d-flex flex-column px-4">
                 <CreateVault
                   onEmailChange={(email) => onEmailChange(email, index)}
                   minimumSigners={minimumSigners}
                     setQuorumDefined={setQuorumDefined}
                     isCreator={isCreator}
+                    index={index}
                   {...item}
                 />
                 {isCreator ? (
                   <>
-                    {/* <DefineQuorum
-                      minimumSigners={minimumSigners}
-                      creatorEmail={creator.email}
-                      setQuorumDefined={setQuorumDefined}
-                      quorumDefined={quorumDefined}
-                      {...item}
-                    /> */}
                     {quorumDefined
                       ? signersArray.map((participant, i) => {
                           if (!participant.email) return false;
@@ -201,6 +194,7 @@ function HomePage() {
                               isCreator={!i}
                               onParticipantAdded={() => onParticipantAdded(i)}
                               minimumSigners={minimumSigners}
+                              mainIndex={index}
                             />
                           );
                         })

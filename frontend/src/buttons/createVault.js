@@ -1,16 +1,26 @@
 import React, { useState } from 'react';
 import { Button, Spinner, InputGroup, Form } from 'react-bootstrap';
 import { NotificationManager } from 'react-notifications';
+import { useAppData } from '../contexts/appData';
 import CustodyContractService from '../contracts/CustodyContractService';
+import { isBalanceLow } from '../utils';
 
 function CreateVault(props) {
     const [loading, setLoading] = useState(false);
     const [vaultCreated, setVaultCreated] = useState(false);
     const [email, setEmail] = useState(props.email || props.defaultEmail || '');
 
+    const {walletBalances, showInsufficientFundModal} = useAppData();
+
+    const balance = walletBalances[props.index];
+
   const createVault = async (e) => {
     e.preventDefault();
     if(!email) return;
+    if(isBalanceLow(balance)) {
+      showInsufficientFundModal(props.index)
+      return;
+    }
     setLoading(true);
     const custodyContract = new CustodyContractService(props.mnemonic);
       custodyContract.createVault(email, props.id).then(res => {

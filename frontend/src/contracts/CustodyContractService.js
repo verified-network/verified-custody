@@ -1,18 +1,11 @@
 import { CustodyContract, Provider, VerifiedWallet } from '@verified-network/verified-sdk';
+import { ethers } from 'ethers';
 
-export const configs = {
-  creatorEmail: 'creator3@email.com',
-  creatorId: 'abc12341',
-  creatorPin: '1234',
-  participantEmail: 'participant3@email.com',
-  participantPin: '5678',
-  participantId: 'xyz12341',
-  network: 'goerli'
-}
+export const network = 'goerli';
 
 class CustodyContractService {
   constructor(mnemonic) {
-    this.wallet = VerifiedWallet.importWallet(mnemonic).setProvider(Provider.infuraProvider(configs.network, process.env.REACT_APP_API_KEY));
+    this.wallet = VerifiedWallet.importWallet(mnemonic).setProvider(Provider.infuraProvider(network, process.env.REACT_APP_API_KEY));
     
     this.userAddress = this.wallet.address;
     this.creatorEmail = null;
@@ -21,9 +14,10 @@ class CustodyContractService {
     this.vault = new CustodyContract(this.wallet);
   }
 
-  getCreator() {
-    this.vault.getCreator(configs.creatorEmail).then(res => {
-    });
+  async getBalance() {
+    const balance = await this.wallet.getBalance();
+    const balanceEth = ethers.utils.formatEther(balance);
+    return Number(balanceEth).toFixed(4);
   }
 
   getVault() {

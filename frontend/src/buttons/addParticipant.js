@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Button, Spinner, Modal, Form } from "react-bootstrap";
 import { NotificationManager } from "react-notifications";
+import { useAppData } from "../contexts/appData";
 import CustodyContractService from "../contracts/CustodyContractService";
+import { isBalanceLow } from "../utils";
 
 function AddParticipant(props) {
   const [loading, setLoading] = useState(false);
@@ -12,8 +14,17 @@ function AddParticipant(props) {
   const [error, setError] = useState("");
   const [confirmed, setConfirmed] = useState(false);
 
+  const {walletBalances, showInsufficientFundModal} = useAppData();
+
+  const balance = walletBalances[props.mainIndex];
+
   const addParticipant = async () => {
+    if(isBalanceLow(balance)) {
+      showInsufficientFundModal(props.mainIndex)
+      return;
+    }
     setLoading(true);
+    
     const custodyContract = new CustodyContractService(props.creator.mnemonic);
 
     custodyContract
@@ -53,6 +64,10 @@ function AddParticipant(props) {
 
   const confirmParticipant = async (e) => {
     e.preventDefault();
+    if(isBalanceLow(balance)) {
+      showInsufficientFundModal(props.mainIndex)
+      return;
+    }
     if (!pin) {
       setError("Please enter pin");
       return;

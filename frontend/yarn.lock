@@ -2530,10 +2530,9 @@
     "@typescript-eslint/types" "5.28.0"
     eslint-visitor-keys "^3.3.0"
 
-"@verified-network/verified-sdk@^0.8.6":
-  version "0.8.6"
-  resolved "https://registry.yarnpkg.com/@verified-network/verified-sdk/-/verified-sdk-0.8.6.tgz#3f7b1eeec68973be649c49981ea07ccdd3d38c5a"
-  integrity sha512-hhd6ApWCaHL9maY0Ong6i9R1NNNjy97UajL3mCRqR2DhbHxROumvPCXPsDpTyfPEPLyApNlMd3JLLRdG2iX7YQ==
+"@verified-network/verified-sdk@https://github.com/verified-network/verified-sdk":
+  version "0.8.7"
+  resolved "https://github.com/verified-network/verified-sdk#abb41661ad88b9c62c4c039b360abd584e50e1a0"
   dependencies:
     ethers "^5.0.31"
 
