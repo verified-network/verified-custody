@@ -3,7 +3,6 @@ import CustodyContractService from "../contracts/CustodyContractService";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Spinner } from "react-bootstrap";
 import CreateVault from "../buttons/createVault";
-import DefineQuorum from "../buttons/defineQuorum";
 import PromptSignatures from "../buttons/promptSignatures";
 import AddParticipant from "../buttons/addParticipant";
 import TotalSignersModal from "../components/totalSignersModal";

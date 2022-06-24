@@ -1,8 +1,5 @@
 import { CustodyContract, Provider, VerifiedWallet } from '@verified-network/verified-sdk';
 
-const mnemonicDefault = 'ozone chief cave farm damage sweet inhale display inch purity leader brick';
-export const API_KEY = '7465b99634184765843e4f232545788f';
-
 export const configs = {
   creatorEmail: 'creator3@email.com',
   creatorId: 'abc12341',
@@ -15,7 +12,7 @@ export const configs = {
 
 class CustodyContractService {
   constructor(mnemonic) {
-    this.wallet = VerifiedWallet.importWallet(mnemonic || mnemonicDefault).setProvider(Provider.infuraProvider(configs.network, API_KEY));
+    this.wallet = VerifiedWallet.importWallet(mnemonic).setProvider(Provider.infuraProvider(configs.network, process.env.REACT_APP_API_KEY));
     
     this.userAddress = this.wallet.address;
     this.creatorEmail = null;
