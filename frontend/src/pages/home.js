@@ -9,6 +9,7 @@ import TotalSignersModal from "../components/totalSignersModal";
 import { isDev } from "../App";
 import WalletInfo from "../components/walletInfo";
 import { useAppData } from "../contexts/appData";
+import Instructions from "../components/instructions";
 const ethers = require("ethers");
 
 const signersMnemonics = JSON.parse(process.env.REACT_APP_MNEMONICS);
@@ -27,7 +28,6 @@ function HomePage() {
   useEffect(() => {
     let randomWallet = ethers.Wallet.createRandom();
     setPrivateKey(randomWallet.privateKey);
-    console.log('Json', JSON.parse(process.env.REACT_APP_MNEMONICS))
   }, []);
 
   useEffect(() => {
@@ -117,9 +117,10 @@ function HomePage() {
 
   return (
     <>
-      <div>
+     <div>
         <h3 className="fw-bold mb-3">Verified Custody</h3>
       </div>
+      <Instructions />
 
       <div className="shadow p-3 rounded-3">
         <div className="d-flex mb-2">

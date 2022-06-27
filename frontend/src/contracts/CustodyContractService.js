@@ -5,7 +5,8 @@ export const network = 'goerli';
 
 class CustodyContractService {
   constructor(mnemonic) {
-    this.wallet = VerifiedWallet.importWallet(mnemonic).setProvider(Provider.infuraProvider(network, process.env.REACT_APP_API_KEY));
+    const provider = process.env.REACT_APP_PROVIDER_TYPE === 'infura' ? Provider.infuraProvider : Provider.alchemyProvider
+    this.wallet = VerifiedWallet.importWallet(mnemonic).setProvider(provider(network, process.env.REACT_APP_API_KEY));
     
     this.userAddress = this.wallet.address;
     this.creatorEmail = null;

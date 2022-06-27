@@ -3,8 +3,8 @@ import { Button, Modal, Form } from "react-bootstrap";
 import { isDev } from "../App";
 
 function TotalSignersModal(props) {
-    const [value, setValue] = useState(isDev ? "5" : "3");
-    const [minimumSigners, setMinimumSigners] = useState(isDev ? "5" : "3");
+    const [value, setValue] = useState(isDev ? "2" : "3");
+    const [minimumSigners, setMinimumSigners] = useState(isDev ? "2" : "3");
     const [error, setError] = useState('');
     const [errorMinimum, setErrorMinimum] = useState('');
 
@@ -15,7 +15,7 @@ function TotalSignersModal(props) {
 
     useEffect(() => {
       if(isDev) {
-        save();
+        // save();
       }
     }, [])
 
